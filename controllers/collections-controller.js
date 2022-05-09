@@ -1,0 +1,122 @@
+const { validationResult } = require("express-validator");
+
+const HttpError = require("../models/http-error");
+const CollectionName = require("../models/CollectionName");
+
+const getCollections = async (req, res, next) => {
+  let collections;
+  try {
+    collections = await CollectionName.find();
+  } catch (err) {
+    const error = new HttpError("Fetching collections failed", 500);
+    return next(error);
+  }
+  res.json({ collections: collections });
+};
+
+const getCollectionById = async (req, res, next) => {
+  const collectionId = req.params.id;
+
+  let collection;
+
+  try {
+    collection = await CollectionName.findById(collectionId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong.", 500);
+    return next(error);
+  }
+
+  if (!collection) {
+    const error = new HttpError(
+      "Could not find a collection for the provided id.",
+      404
+    );
+    return next(error);
+  }
+
+  res.json({ collection: collection.toObject({ getters: true }) });
+};
+
+const createCollection = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    res.status(422);
+    throw new HttpError("Invalid inputs passed, check data", 422);
+  }
+
+  const { seller, name, description, created } = req.body;
+
+  const createdCollection = new CollectionName({
+    seller,
+    name,
+    description,
+    created,
+  });
+
+  try {
+    await createdCollection.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Creating collection failed, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(201).json({ collection: createdCollection });
+};
+
+const updateCollection = async (req, res, next) => {
+  const { seller, name, description, created } = req.body;
+  const collectionId = req.params.id;
+
+  let collection;
+  try {
+    collection = await CollectionName.findById(collectionId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+
+  collection.seller = seller;
+  collection.name = name;
+  collection.description = description;
+  collection.created = created;
+
+  try {
+    await collection.save();
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ collection: collection.toObject({ getters: true }) });
+};
+
+const deleteCollection = async (req, res, next) => {
+  const collectionId = req.params.id;
+
+  let collection;
+  try {
+    collection = await CollectionName.findById(collectionId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+
+  try {
+    collection.remove();
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ message: "Deleted collection" });
+};
+
+exports.getCollections = getCollections;
+exports.getCollectionById = getCollectionById;
+exports.createCollection = createCollection;
+exports.deleteCollection = deleteCollection;
+exports.updateCollection = updateCollection;
