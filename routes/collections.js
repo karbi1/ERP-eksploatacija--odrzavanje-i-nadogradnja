@@ -1,11 +1,13 @@
 const express = require("express");
-const { check } = require("express-validator");
 
 const collectionsController = require("../controllers/collections-controller");
+const checkAuth = require("../middleware/check-auth");
 
 const router = express.Router();
 
 router.get("/", collectionsController.getCollections);
+
+router.use(checkAuth);
 
 router.get("/:id", collectionsController.getCollectionById);
 

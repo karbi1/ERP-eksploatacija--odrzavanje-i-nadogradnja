@@ -1,3 +1,7 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const HttpError = require("../models/http-error");
 const Seller = require("../models/Seller");
 const CollectionName = require("../models/CollectionName.js");
@@ -59,12 +63,31 @@ const updateSeller = async (req, res, next) => {};
 const signup = async (req, res, next) => {
   const { email, password, brandName, brandDescription } = req.body;
 
-  const hasSeller = Seller.find((s) => s.email === email);
-  if (hasSeller) {
-    throw new HttpError(
-      "Seller is already registered with this email address.",
-      401
+  let existingSeller;
+  try {
+    existingSeller = await Seller.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError("Signing up failed, please try again.", 500);
+    return next(error);
+  }
+
+  if (existingSeller) {
+    const error = new HttpError(
+      "User exists already, please login instead.",
+      422
     );
+    return next(error);
+  }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not create user, please try again.",
+      500
+    );
+    return next(error);
   }
 
   const createdSeller = new Seller({
@@ -84,18 +107,90 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ seller: createdSeller });
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  const identifiedSeller = Seller.find((s) => s.email === email);
-  if (!identifiedSeller || identifiedSeller.password !== password) {
-    throw new HttpError("Wrong credentials.", 401);
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdSeller.id, email: createdSeller.email },
+      "private_key",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Creating seller failed, please try again.",
+      500
+    );
+    return next(error);
   }
 
-  res.json({ message: "Logged in." });
+  res.status(201).json({
+    userId: createdSeller.id,
+    email: createdSeller.email,
+    token: token,
+  });
+};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let existingSeller;
+
+  try {
+    existingSeller = await Seller.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError(
+      "Logging in failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!existingSeller) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      401
+    );
+    return next(error);
+  }
+
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingSeller.password);
+  } catch (err) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      500
+    );
+    return next(error);
+  }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingSeller.id, email: existingSeller.email },
+      "private_key",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Logging in seller failed, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  res.json({
+    userId: existingSeller.id,
+    email: existingSeller.email,
+    token: token,
+  });
 };
 
 exports.getSellers = getSellers;

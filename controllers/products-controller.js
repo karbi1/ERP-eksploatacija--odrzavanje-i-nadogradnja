@@ -112,7 +112,8 @@ const updateProduct = async (req, res, next) => {
     const error = new HttpError("Something went wrong, could not update.", 500);
     return next(error);
   }
-
+  product.collectionName = collectionName;
+  product.productType = productType;
   product.name = name;
   product.description = description;
   product.gender = gender;

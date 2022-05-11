@@ -1,7 +1,10 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const HttpError = require("../models/http-error");
 const Buyer = require("../models/Buyer");
-
-const DUMMY_BUYERS = [{ id: "1", name: "Nikola", password: "sifrarijus" }];
+const Cart = require("../models/Cart");
 
 const getBuyers = async (req, res, next) => {
   let buyers;
@@ -19,24 +22,49 @@ const updateBuyer = async (req, res, next) => {};
 const signup = async (req, res, next) => {
   const { email, password, name, lastName, dateOfBirth } = req.body;
 
-  const hasBuyer = Buyer.find((b) => b.email === email);
-  if (hasBuyer) {
-    throw new HttpError(
-      "Buyer is already registered with this email address",
-      401
+  let existingBuyer;
+  try {
+    existingBuyer = await Buyer.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError("Signing up failed, please try again.", 500);
+    return next(error);
+  }
+
+  if (existingBuyer) {
+    const error = new HttpError(
+      "User exists already, please login instead.",
+      422
     );
+    return next(error);
+  }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not create user, please try again.",
+      500
+    );
+    return next(error);
   }
 
   const createdBuyer = new Buyer({
     email,
-    password,
+    password: hashedPassword,
     name,
     lastName,
     dateOfBirth,
   });
+  var createdCart = new Cart({});
 
   try {
-    await createdBuyer.save();
+    const sess = await mongoose.startSession();
+    await createdBuyer.save({ session: sess });
+    await createdCart.save({ session: sess });
+    createdCart.buyer = createdBuyer;
+    await createdCart.save({ session: sess });
+    sess.endSession();
   } catch (err) {
     const error = new HttpError(
       "Creating buyer failed, please try again.",
@@ -45,18 +73,88 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ buyer: createdBuyer });
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  const identifiedBuyer = Buyer.find((b) => b.email === email);
-  if (!identifiedBuyer || identifiedBuyer.password !== password) {
-    throw new HttpError("Wrong credentials.", 401);
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdBuyer.id, email: createdBuyer.email },
+      "private_key",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Creating buyer failed, please try again.",
+      500
+    );
+    return next(error);
   }
 
-  res.json({ message: "Logged in." });
+  res
+    .status(201)
+    .json({ userId: createdBuyer.id, email: createdBuyer.email, token: token });
+};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let existingBuyer;
+
+  try {
+    existingBuyer = await Buyer.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError(
+      "Logging in failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!existingBuyer) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      401
+    );
+    return next(error);
+  }
+
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingBuyer.password);
+  } catch (err) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError(
+      "Invalid credentials, could not log you in.",
+      500
+    );
+    return next(error);
+  }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingBuyer.id, email: existingBuyer.email },
+      "private_key",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Logging in buyer failed, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  res.json({
+    userId: existingBuyer.id,
+    email: existingBuyer.email,
+    token: token,
+  });
 };
 
 exports.getBuyers = getBuyers;
