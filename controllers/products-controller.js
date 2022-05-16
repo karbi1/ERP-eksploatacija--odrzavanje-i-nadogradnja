@@ -71,9 +71,10 @@ const createProduct = async (req, res, next) => {
     xxxl,
     xxxxl,
   });
+  
 
   try {
-    await createProduct.save();
+    await createdProduct.save();
   } catch (err) {
     const error = new HttpError(
       "Creating product failed, please try again.",
@@ -112,6 +113,15 @@ const updateProduct = async (req, res, next) => {
     const error = new HttpError("Something went wrong, could not update.", 500);
     return next(error);
   }
+
+  if (sellerId !== req.userData.userId) {
+    const Error = new HttpError(
+      "You are not allowed to delete this collection",
+      401
+    );
+    return next(Error);
+  }
+
   product.collectionName = collectionName;
   product.productType = productType;
   product.name = name;
@@ -127,6 +137,7 @@ const updateProduct = async (req, res, next) => {
   product.xxl = xxl;
   product.xxxl = xxxl;
   product.xxxxl = xxxxl;
+
 
   try {
     await product.save();
@@ -147,6 +158,14 @@ const deleteProduct = async (req, res, next) => {
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
+  }
+
+  if (sellerId !== req.userData.userId) {
+    const Error = new HttpError(
+      "You are not allowed to delete this collection",
+      401
+    );
+    return next(Error);
   }
 
   try {

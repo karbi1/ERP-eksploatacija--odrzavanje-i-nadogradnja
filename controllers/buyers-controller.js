@@ -17,7 +17,51 @@ const getBuyers = async (req, res, next) => {
   res.json({ buyers: buyers });
 };
 
-const updateBuyer = async (req, res, next) => {};
+const updateBuyer = async (req, res, next) => {
+  const { email, password, name, lastName, dateOfBirth } = req.body;
+  const buyerId = req.params.id;
+
+  let buyer;
+  try {
+    buyer = await Buyer.findById(buyerId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+  if (buyer._id.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not allowed to edit this collection",
+      401
+    );
+    return next(error);
+  }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not update user, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  buyer.dateOfBirth = dateOfBirth;
+  buyer.name = name;
+  buyer.lastName = lastName;
+  buyer.email = email;
+  buyer.password = hashedPassword;
+
+  try {
+    await buyer.save();
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ buyer: buyer.toObject({ getters: true }) });
+};
 
 const signup = async (req, res, next) => {
   const { email, password, name, lastName, dateOfBirth } = req.body;
@@ -55,6 +99,7 @@ const signup = async (req, res, next) => {
     name,
     lastName,
     dateOfBirth,
+    role: "Buyer",
   });
   var createdCart = new Cart({});
 
@@ -76,7 +121,11 @@ const signup = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: createdBuyer.id, email: createdBuyer.email },
+      {
+        userId: createdBuyer.id,
+        email: createdBuyer.email,
+        role: createdBuyer.role,
+      },
       "private_key",
       { expiresIn: "1h" }
     );
@@ -88,9 +137,12 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res
-    .status(201)
-    .json({ userId: createdBuyer.id, email: createdBuyer.email, token: token });
+  res.status(201).json({
+    userId: createdBuyer.id,
+    email: createdBuyer.email,
+    token: token,
+    role: createdBuyer.role,
+  });
 };
 
 const login = async (req, res, next) => {
@@ -138,7 +190,11 @@ const login = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: existingBuyer.id, email: existingBuyer.email },
+      {
+        userId: existingBuyer.id,
+        email: existingBuyer.email,
+        role: existingBuyer.role,
+      },
       "private_key",
       { expiresIn: "1h" }
     );
@@ -153,11 +209,40 @@ const login = async (req, res, next) => {
   res.json({
     userId: existingBuyer.id,
     email: existingBuyer.email,
+    role: existingBuyer.role,
     token: token,
   });
+};
+
+const removeBuyer = async (req, res, next) => {
+  const buyerId = req.params.id;
+
+  let buyer;
+  try {
+    buyer = await Buyer.findById(buyerId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+
+  if (buyerId !== req.userData.userId || req.userData.role !== ROLE.ADMIN) {
+    const Error = new HttpError(
+      "You are not allowed to delete this buyer",
+      401
+    );
+    return next(Error);
+  }
+
+  try {
+    Buyer.remove();
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
 };
 
 exports.getBuyers = getBuyers;
 exports.updateBuyer = updateBuyer;
 exports.signup = signup;
 exports.login = login;
+exports.removeBuyer = removeBuyer;

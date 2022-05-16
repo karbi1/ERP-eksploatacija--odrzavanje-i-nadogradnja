@@ -8,6 +8,8 @@ const sellersRoutes = require("./routes/sellers");
 const productsRoutes = require("./routes/products");
 const ordersRoutes = require("./routes/orders");
 const productTypesRoutes = require("./routes/productType");
+const adminsRoutes = require("./routes/admin");
+const cartsRoutes = require("./routes/carts");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -20,7 +22,10 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATH, DELETE");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PATH, DELETE, OPTIONS"
+  );
 
   next();
 });
@@ -31,6 +36,8 @@ app.use("/sellers", sellersRoutes);
 app.use("/products", productsRoutes);
 app.use("/productTypes", productTypesRoutes);
 app.use("/orders", ordersRoutes);
+app.use("/admin", adminsRoutes);
+app.use("/carts", cartsRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route.", 404);

@@ -6,9 +6,9 @@ const CartItem = require("./models/CartItem");
 const CollectionName = require("./models/CollectionName");
 const Order = require("./models/Order");
 const Product = require("./models/Product");
-const ProductAmount = require("./models/ProductAmount");
 const ProductType = require("./models/ProductType");
 const Seller = require("./models/Seller");
+const Admin = require("./models/Admin");
 
 mongoose.connect("mongodb://localhost/webshopdb");
 
@@ -109,16 +109,14 @@ async function runScript() {
     gender: "muska",
     price: "2000",
   });
+   */
   const product2 = await Product.create({
-    collectionName: mongoose.Types.ObjectId("625d2092c56c6c53da6d6559"),
-    productType: mongoose.Types.ObjectId("625d292d8aa33e885f204d3c"),
+    collectionName: mongoose.Types.ObjectId("627f85b45a44e4fa4f5297ae"),
     name: "Crveni",
     gender: "muska",
     price: "2300",
   });
-  await console.log(product); 625d2ab3127b3350d7208ee3
-  await console.log(product2); 625d2ab3127b3350d7208ee6
-  */
+
   /*
   ------------------------------------------Product amount
   const productAmount = await ProductAmount.create({
@@ -174,6 +172,7 @@ async function runScript() {
     country: "Serbia",
     cart: mongoose.Types.ObjectId("625d1d50938a5ba8155f32e4"),
   });
+  
   const order2 = await Order.create({
     status: "Dostavljeno",
     phoneNumber: "+381652211041",
@@ -186,24 +185,8 @@ async function runScript() {
   await console.log(order);
   await console.log(order2);
   */
-  try {
-    const collectionName = await CollectionName.where("name")
-      .equals("Leto 2022")
-      .populate("seller");
-    console.log(collectionName);
-  } catch (e) {
-    console.log(e.message);
-  }
-  try {
-    const buyer = await Buyer.findOne();
-    console.log(buyer);
-  } catch (e) {
-    console.log(e.message);
-  }
-  try {
-    const buyers = await Buyer.find();
-    console.log(buyers);
-  } catch (e) {
-    console.log(e.message);
-  }
+  /* const admin = await Admin.create({
+    email: "bikar@bikar",
+    password: "bikar",
+  });*/
 }

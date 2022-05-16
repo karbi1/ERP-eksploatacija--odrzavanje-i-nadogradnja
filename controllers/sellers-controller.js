@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const ROLE = require("../data/data");
 const HttpError = require("../models/http-error");
 const Seller = require("../models/Seller");
 const CollectionName = require("../models/CollectionName.js");
@@ -46,6 +47,7 @@ const getSellerById = async (req, res, next) => {
     seller = await Seller.findById(sellerId);
   } catch (err) {
     const error = new HttpError("Fetching seller failed.", 500);
+    return next(error);
   }
 
   if (!seller) {
@@ -58,7 +60,53 @@ const getSellerById = async (req, res, next) => {
   res.json({ seller: seller.toObject({ getters: true }) });
 };
 
-const updateSeller = async (req, res, next) => {};
+const updateSeller = async (req, res, next) => {
+  const { brandName, brandDescription, email, password } = req.body;
+  const sellerId = req.params.id;
+
+  let seller;
+  try {
+    seller = await Seller.findById(sellerId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+  if (
+    seller._id.toString() !== req.userData.userId ||
+    req.userData.role !== ROLE.ADMIN
+  ) {
+    const error = new HttpError(
+      "You are not allowed to edit this collection",
+      401
+    );
+    return next(error);
+  }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not update user, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  seller.email = email;
+  seller.password = hashedPassword;
+  seller.brandName = brandName;
+  seller.brandDescription = brandDescription;
+
+  try {
+    await seller.save();
+  } catch (err) {
+    const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ seller: seller.toObject({ getters: true }) });
+};
 
 const signup = async (req, res, next) => {
   const { email, password, brandName, brandDescription } = req.body;
@@ -92,9 +140,10 @@ const signup = async (req, res, next) => {
 
   const createdSeller = new Seller({
     email,
-    password,
+    password: hashedPassword,
     brandName,
     brandDescription,
+    role: "Seller",
   });
 
   try {
@@ -110,7 +159,11 @@ const signup = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: createdSeller.id, email: createdSeller.email },
+      {
+        userId: createdSeller.id,
+        email: createdSeller.email,
+        role: createdSeller.role,
+      },
       "private_key",
       { expiresIn: "1h" }
     );
@@ -125,6 +178,7 @@ const signup = async (req, res, next) => {
   res.status(201).json({
     userId: createdSeller.id,
     email: createdSeller.email,
+    role: createdSeller.role,
     token: token,
   });
 };
@@ -174,7 +228,11 @@ const login = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: existingSeller.id, email: existingSeller.email },
+      {
+        userId: existingSeller.id,
+        email: existingSeller.email,
+        role: existingSeller.role,
+      },
       "private_key",
       { expiresIn: "1h" }
     );
@@ -189,8 +247,36 @@ const login = async (req, res, next) => {
   res.json({
     userId: existingSeller.id,
     email: existingSeller.email,
+    role: existingSeller.role,
     token: token,
   });
+};
+
+const deleteSeller = async (req, res, next) => {
+  const sellerId = req.params.id;
+
+  let seller;
+  try {
+    seller = await Seller.findById(sellerId);
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+
+  if (sellerId !== req.userData.userId || req.userData.role !== ROLE.ADMIN) {
+    const Error = new HttpError(
+      "You are not allowed to delete this seller",
+      401
+    );
+    return next(Error);
+  }
+
+  try {
+    Seller.remove();
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
 };
 
 exports.getSellers = getSellers;
@@ -199,3 +285,4 @@ exports.login = login;
 exports.getSellerById = getSellerById;
 exports.getSellerCollections = getSellerCollections;
 exports.updateSeller = updateSeller;
+exports.deleteSeller = deleteSeller;

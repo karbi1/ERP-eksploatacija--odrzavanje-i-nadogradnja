@@ -9,7 +9,7 @@ const getProductTypes = async (req, res, next) => {
     const error = new HttpError("Fetching product types failed", 500);
     return next(error);
   }
-  // res.json({ productTypes: productTypes });
+  res.json({ productTypes: productTypes });
 };
 
 const createProductType = async (req, res, next) => {

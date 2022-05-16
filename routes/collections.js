@@ -1,20 +1,34 @@
 const express = require("express");
 
 const collectionsController = require("../controllers/collections-controller");
-const checkAuth = require("../middleware/check-auth");
+const { authUser, authRole } = require("../middleware/auth");
+const { ROLE } = require("../data/data");
 
 const router = express.Router();
 
 router.get("/", collectionsController.getCollections);
 
-router.use(checkAuth);
-
 router.get("/:id", collectionsController.getCollectionById);
 
-router.post("/", collectionsController.createCollection);
+router.post(
+  "/",
+  authUser,
+  authRole(ROLE.SELLER),
+  collectionsController.createCollection
+);
 
-router.patch("/:id", collectionsController.updateCollection);
+router.patch(
+  "/:id",
+  authUser,
+  authRole(ROLE.SELLER, true),
+  collectionsController.updateCollection
+);
 
-router.delete("/:id", collectionsController.deleteCollection);
+router.delete(
+  "/:id",
+  authUser,
+  authRole(ROLE.SELLER, true),
+  collectionsController.deleteCollection
+);
 
 module.exports = router;

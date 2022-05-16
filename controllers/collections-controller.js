@@ -54,6 +54,14 @@ const createCollection = async (req, res, next) => {
     created,
   });
 
+  if (sellerId !== req.userData.userId) {
+    const Error = new HttpError(
+      "You are not allowed to delete this collection",
+      401
+    );
+    return next(Error);
+  }
+
   try {
     await createdCollection.save();
   } catch (err) {
@@ -76,6 +84,14 @@ const updateCollection = async (req, res, next) => {
     collection = await CollectionName.findById(collectionId);
   } catch (err) {
     const error = new HttpError("Something went wrong, could not update.", 500);
+    return next(error);
+  }
+
+  if (collection.seller.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not allowed to edit this collection",
+      401
+    );
     return next(error);
   }
 
@@ -103,6 +119,16 @@ const deleteCollection = async (req, res, next) => {
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
+  }
+
+  let sellerId = collection.seller.toString();
+
+  if (sellerId !== req.userData.userId && req.userData.role !== ROLE.ADMIN) {
+    const Error = new HttpError(
+      "You are not allowed to delete this collection",
+      401
+    );
+    return next(Error);
   }
 
   try {
