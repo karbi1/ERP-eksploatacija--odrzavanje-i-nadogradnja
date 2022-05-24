@@ -71,7 +71,6 @@ const createProduct = async (req, res, next) => {
     xxxl,
     xxxxl,
   });
-  
 
   try {
     await createdProduct.save();
@@ -137,7 +136,6 @@ const updateProduct = async (req, res, next) => {
   product.xxl = xxl;
   product.xxxl = xxxl;
   product.xxxxl = xxxxl;
-
 
   try {
     await product.save();

@@ -19,10 +19,12 @@ router.get(
 router.post("/", authUser, authRole(ROLE.BUYER), cartsController.addCartItem);
 
 router.delete(
-  "/",
+  "/:id",
   authUser,
   authRole(ROLE.BUYER),
   cartsController.removeCartItem
 );
+
+router.delete("/", authUser, authRole(ROLE.BUYER), cartsController.emptyCart);
 
 module.exports = router;

@@ -9,6 +9,7 @@ const Product = require("./models/Product");
 const ProductType = require("./models/ProductType");
 const Seller = require("./models/Seller");
 const Admin = require("./models/Admin");
+const bcrypt = require("bcryptjs");
 
 mongoose.connect("mongodb://localhost/webshopdb");
 
@@ -110,13 +111,12 @@ async function runScript() {
     price: "2000",
   });
    */
-  const product2 = await Product.create({
+  /*const product2 = await Product.create({
     collectionName: mongoose.Types.ObjectId("627f85b45a44e4fa4f5297ae"),
     name: "Crveni",
     gender: "muska",
     price: "2300",
-  });
-
+  });*/
   /*
   ------------------------------------------Product amount
   const productAmount = await ProductAmount.create({
@@ -189,4 +189,26 @@ async function runScript() {
     email: "bikar@bikar",
     password: "bikar",
   });*/
+
+  let password = "nikola";
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not create user, please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  const createdAdmin = await Admin.create({
+    email: "nikola@gmail.com",
+    password: hashedPassword,
+    name: "Nikola",
+    lastName: "Bikar",
+    role: "Admin",
+  });
+
+  await console.log(createdAdmin);
 }

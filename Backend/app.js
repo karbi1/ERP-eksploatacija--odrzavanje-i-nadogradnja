@@ -8,7 +8,7 @@ const sellersRoutes = require("./routes/sellers");
 const productsRoutes = require("./routes/products");
 const ordersRoutes = require("./routes/orders");
 const productTypesRoutes = require("./routes/productType");
-const adminsRoutes = require("./routes/admin");
+const adminsRoutes = require("./routes/admins");
 const cartsRoutes = require("./routes/carts");
 const HttpError = require("./models/http-error");
 
@@ -36,7 +36,7 @@ app.use("/sellers", sellersRoutes);
 app.use("/products", productsRoutes);
 app.use("/productTypes", productTypesRoutes);
 app.use("/orders", ordersRoutes);
-app.use("/admin", adminsRoutes);
+app.use("/admins", adminsRoutes);
 app.use("/carts", cartsRoutes);
 
 app.use((req, res, next) => {

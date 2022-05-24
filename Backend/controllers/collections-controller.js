@@ -54,7 +54,7 @@ const createCollection = async (req, res, next) => {
     created,
   });
 
-  if (sellerId !== req.userData.userId) {
+  if (seller !== req.userData.userId) {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401
