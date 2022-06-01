@@ -141,6 +141,21 @@ const deleteCollection = async (req, res, next) => {
   res.status(200).json({ message: "Deleted collection" });
 };
 
+const getCollectionsBySeller = async (req, res, next) => {
+  const sellerId = req.params.id;
+
+  let collections;
+  try {
+    collections = await CollectionName.find({ seller: sellerId });
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+
+  res.json({ collections: collections });
+};
+
+exports.getCollectionsBySeller = getCollectionsBySeller;
 exports.getCollections = getCollections;
 exports.getCollectionById = getCollectionById;
 exports.createCollection = createCollection;

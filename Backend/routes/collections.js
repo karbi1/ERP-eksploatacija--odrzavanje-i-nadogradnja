@@ -10,6 +10,8 @@ router.get("/", collectionsController.getCollections);
 
 router.get("/:id", collectionsController.getCollectionById);
 
+router.get("/seller/:id", collectionsController.getCollectionsBySeller);
+
 router.post(
   "/",
   authUser,

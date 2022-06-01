@@ -1,0 +1,67 @@
+:root {
+  --body: #ffffff;
+  --text: #363636;
+  --text-light: #898989;
+  --primary: #1bbeff;
+  --black: #000000;
+  --border: #bbbbbb;
+  --padding: 16px 10px;
+  --line-height: 20px;
+}
+
+body {
+  background-color: var(--body);
+}
+
+.input-group {
+  width: 360px;
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+}
+.input-group input {
+  padding: var(--padding);
+  border: none;
+  background-color: transparent;
+  width: 100%;
+  color: var(--text);
+  font-size: 16px;
+  line-height: var(--line-height);
+}
+
+.input-group:hover,
+.input-group:focus-within {
+  border-color: var(--black);
+}
+
+.input-group input:focus,
+.input-group:hover input {
+  color: "black";
+}
+
+.input-group label {
+  position: absolute;
+  background-color: transparent;
+  padding: var(--padding);
+  line-height: var(--line-height);
+  font-size: 12px;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  color: var(--text-light);
+  cursor: text;
+}
+
+.input-group:hover label {
+  color: var(--primary);
+}
+
+.input-group:focus-within label,
+.input-group input:not(:placeholder-shown) ~ label {
+  padding: 0px 8px;
+  background-color: var(--body);
+  top: -12px;
+  left: 16px;
+  bottom: auto;
+  color: var(--text);
+}
