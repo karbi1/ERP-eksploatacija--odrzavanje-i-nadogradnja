@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import Collection from "./../../../Collection";
+import CollectionItem from "../../collection/components/CollectionItem";
 import { makeStyles } from "@mui/styles";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -16,6 +16,7 @@ export default function SellerCollections(props) {
   const [isLoading, setIsLoading] = useState(false);
   //const [error, setError] = useState();
   const [loadedCollections, setLoadedCollections] = useState();
+  const [isCreator, setIsCreator] = useState();
   const params = useParams();
 
   const classes = useStyles();
@@ -36,6 +37,7 @@ export default function SellerCollections(props) {
       } catch (err) {
         //setError(err.message);
       }
+
       setIsLoading(false);
     };
     sendRequest();
@@ -56,10 +58,11 @@ export default function SellerCollections(props) {
         <Grid container spacing={4} className={classes.gridContainer}>
           {loadedCollections.map((loadedCollection, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Collection
+              <CollectionItem
                 name={loadedCollection.name}
-                created={loadedCollection.created}
-                id={loadedCollection._id}
+                description={loadedCollection.description}
+                collectionId={loadedCollection._id}
+                sellerId={params.id}
               />
             </Grid>
           ))}

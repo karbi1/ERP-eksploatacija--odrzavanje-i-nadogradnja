@@ -47,8 +47,9 @@ export default function SignIn() {
       if (!response.ok) {
         throw new Error(responseData.message);
       }
+      console.log(responseData);
       if (responseData.token) {
-        auth.login(responseData.userId, responseData.token);
+        auth.login(responseData.userId, responseData.token, responseData.role);
       }
     } catch (err) {
       console.log(err);

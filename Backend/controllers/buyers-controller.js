@@ -6,6 +6,17 @@ const HttpError = require("../models/http-error");
 const Buyer = require("../models/Buyer");
 const Cart = require("../models/Cart");
 
+const getBuyer = async (req, res, next) => {
+  let buyer;
+  try {
+    buyer = await Buyer.findById(req.params.id);
+  } catch (err) {
+    const error = new HttpError("Fetching buyer failed.", 500);
+    return next(error);
+  }
+  res.json({ buyer: buyer });
+};
+
 const getBuyers = async (req, res, next) => {
   let buyers;
   try {
@@ -234,7 +245,7 @@ const removeBuyer = async (req, res, next) => {
   }
 
   try {
-    Buyer.remove();
+    buyer.remove();
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
@@ -245,4 +256,5 @@ exports.getBuyers = getBuyers;
 exports.updateBuyer = updateBuyer;
 exports.signup = signup;
 exports.login = login;
+exports.getBuyer = getBuyer;
 exports.removeBuyer = removeBuyer;

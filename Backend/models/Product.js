@@ -8,6 +8,11 @@ const productSchema = new mongoose.Schema({
     ref: "CollectionName",
     required: true,
   },
+  seller: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: "Seller",
+    required: true,
+  },
   productType: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "ProductType",
@@ -31,11 +36,6 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  xs: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
   s: {
     type: Number,
     required: true,
@@ -52,21 +52,6 @@ const productSchema = new mongoose.Schema({
     min: 0,
   },
   xl: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  xxl: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  xxxl: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  xxxxl: {
     type: Number,
     required: true,
     min: 0,

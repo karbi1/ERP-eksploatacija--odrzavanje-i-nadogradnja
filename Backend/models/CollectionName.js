@@ -21,6 +21,11 @@ const collectionNameSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  img: {
+    name: String,
+    data: Buffer,
+    contentType: String,
+  },
 });
 
 collectionNameSchema.pre("remove", function (next) {

@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 export default function Seller(props) {
   return (
-    <Card sx={{ maxWidth: 200 }} variant="outlined">
+    <Card sx={{ width: 350, height: 450 }} variant="outlined">
       <CardActionArea component={Link} to={`/sellers/${props.id}/collections`}>
         <CardMedia
           component="img"

@@ -17,13 +17,4 @@ router.get(
 
 router.post("/", authUser, authRole(ROLE.BUYER), ordersController.createOrder);
 
-router.post("/:id", authUser, authRole(ROLE.BUYER), ordersController.order);
-
-router.delete(
-  "/:id",
-  authUser,
-  authRole(ROLE.BUYER),
-  ordersController.cancelOrder
-);
-
 module.exports = router;

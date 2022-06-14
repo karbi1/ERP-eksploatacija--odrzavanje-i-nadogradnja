@@ -71,16 +71,6 @@ const updateSeller = async (req, res, next) => {
     const error = new HttpError("Something went wrong, could not update.", 500);
     return next(error);
   }
-  if (
-    seller._id.toString() !== req.userData.userId ||
-    req.userData.role !== ROLE.ADMIN
-  ) {
-    const error = new HttpError(
-      "You are not allowed to edit this collection",
-      401
-    );
-    return next(error);
-  }
 
   let hashedPassword;
   try {

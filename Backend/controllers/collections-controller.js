@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const CollectionName = require("../models/CollectionName");
+const Product = require("../models/Product");
 
 const getCollections = async (req, res, next) => {
   let collections;
@@ -123,7 +124,7 @@ const deleteCollection = async (req, res, next) => {
 
   let sellerId = collection.seller.toString();
 
-  if (sellerId !== req.userData.userId && req.userData.role !== ROLE.ADMIN) {
+  if (sellerId.toString() !== req.userData.userId) {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401
@@ -155,6 +156,20 @@ const getCollectionsBySeller = async (req, res, next) => {
   res.json({ collections: collections });
 };
 
+const getProductsFromCollection = async (req, res, next) => {
+  const collectionId = req.params.collectionId;
+
+  let products;
+  try {
+    products = await Product.find({ collectionName: collectionId });
+  } catch (err) {
+    const error = new HttpError("Something went wrong", 500);
+    return next(error);
+  }
+  res.json({ products: products });
+};
+
+exports.getProductsFromCollection = getProductsFromCollection;
 exports.getCollectionsBySeller = getCollectionsBySeller;
 exports.getCollections = getCollections;
 exports.getCollectionById = getCollectionById;

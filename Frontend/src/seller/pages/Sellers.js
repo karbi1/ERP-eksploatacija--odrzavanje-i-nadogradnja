@@ -1,7 +1,7 @@
-import { Grid } from "@mui/material";
-import ProductItem from "./ProductItem";
-import { makeStyles } from "@mui/styles";
 import React, { useEffect, useState } from "react";
+import { makeStyles } from "@mui/styles";
+import { Grid } from "@mui/material";
+import Seller from "../components/Seller";
 
 const useStyles = makeStyles({
   gridContainer: {
@@ -11,10 +11,10 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ProductList() {
+const Sellers = () => {
   const [isLoading, setIsLoading] = useState(false);
   //const [error, setError] = useState();
-  const [loadedProducts, setLoadedProducts] = useState();
+  const [loadedSellers, setLoadedSellers] = useState();
 
   const classes = useStyles();
 
@@ -22,13 +22,13 @@ export default function ProductList() {
     const sendRequest = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("http://localhost:5000/products");
+        const response = await fetch("http://localhost:5000/sellers");
         const responseData = await response.json();
 
         if (!response.ok) {
           throw new Error(responseData.message);
         }
-        setLoadedProducts(responseData.products);
+        setLoadedSellers(responseData.sellers);
       } catch (err) {
         //setError(err.message);
       }
@@ -37,10 +37,6 @@ export default function ProductList() {
     sendRequest();
   }, []);
 
-  /*const errorHandler = () => {
-    setError(null);
-  };*/
-
   return (
     <React.Fragment>
       {isLoading && (
@@ -48,14 +44,14 @@ export default function ProductList() {
           <h1>loading</h1>
         </div>
       )}
-      {!isLoading && loadedProducts && (
+      {!isLoading && loadedSellers && (
         <Grid container spacing={4} className={classes.gridContainer}>
-          {loadedProducts.map((loadedProduct, index) => (
+          {loadedSellers.map((loadedSeller, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <ProductItem
-                title={loadedProduct.name}
-                price={loadedProduct.price}
-                id={loadedProduct._id}
+              <Seller
+                name={loadedSeller.brandName}
+                description={loadedSeller.brandDescription}
+                id={loadedSeller._id}
               />
             </Grid>
           ))}
@@ -63,4 +59,6 @@ export default function ProductList() {
       )}
     </React.Fragment>
   );
-}
+};
+
+export default Sellers;

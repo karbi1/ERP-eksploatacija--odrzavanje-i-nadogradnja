@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,13 +13,13 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 
-import "./DatePicker.css";
-import Modal from "../../shared/Modal";
+import { AuthContext } from "../../shared/context/auth-context";
 
 const theme = createTheme();
 
 export default function SellerSignUp() {
   const [loading, setLoading] = useState(false);
+  const auth = useContext(AuthContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,17 +27,16 @@ export default function SellerSignUp() {
     setLoading(true);
     const data = new FormData(event.currentTarget);
     try {
-      const response = await fetch("http://localhost:5000/buyers/signup", {
+      const response = await fetch("http://localhost:5000/sellers/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: data.get("name"),
-          lastName: data.get("lastName"),
+          brandName: data.get("brandName"),
+          brandDescription: data.get("brandDescription"),
           email: data.get("email"),
           password: data.get("password"),
-          dateOfBirth: data.get("dateOfBirth"),
         }),
       });
 
@@ -45,7 +44,9 @@ export default function SellerSignUp() {
       if (!response.ok) {
         throw new Error(responseData.message);
       }
-      console.log(responseData);
+      if (responseData.token) {
+        auth.login(responseData.userId, responseData.token, responseData.role);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -54,7 +55,7 @@ export default function SellerSignUp() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth="sm">
         <CssBaseline />
         <Box
           sx={{
@@ -83,25 +84,27 @@ export default function SellerSignUp() {
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   autoComplete="given-name"
-                  name="name"
+                  name="brandName"
                   required
                   fullWidth
-                  id="name"
-                  label="First Name"
+                  id="brandName"
+                  label="Brand name"
                   autoFocus
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
-                  required
+                  id="brandDescription"
+                  label="Brand description"
+                  name="brandDescription"
+                  multiline
                   fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
+                  required
+                  rows={3}
+                  placeholder="Brand description"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -124,12 +127,6 @@ export default function SellerSignUp() {
                   id="password"
                   autoComplete="new-password"
                 />
-              </Grid>
-              <Grid item xs={12}>
-                <div className="input-group">
-                  <input type="date" name="dateOfBirth" id="date" />
-                  <label htmlFor="date">Date</label>
-                </div>
               </Grid>
             </Grid>
             <Button

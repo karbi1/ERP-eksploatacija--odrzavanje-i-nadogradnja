@@ -12,16 +12,16 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { Link } from "react-router-dom";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
+import SellerNav from "./SellerNav";
+import BuyerNav from "./BuyerNav";
 import { AuthContext } from "../shared/context/auth-context";
 
-const pages = ["products", "sellers", "about us"];
+const pages = ["products", "sellers"];
 const settings = ["Account", "Order history", "Logout"];
 
 const ResponsiveAppBar = () => {
   const auth = useContext(AuthContext);
-
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -78,6 +78,7 @@ const ResponsiveAppBar = () => {
               </Link>
             ))}
           </Box>
+
           {!auth.isLoggedIn && (
             <Box>
               <Link to="/login">
@@ -95,49 +96,8 @@ const ResponsiveAppBar = () => {
               </Link>
             </Box>
           )}
-          {auth.isLoggedIn && (
-            <React.Fragment>
-              <Link to="/sellers">
-                <Button style={{ color: "white" }}>
-                  <ShoppingCartIcon
-                    sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-                  />
-                </Button>
-              </Link>
-              <Box sx={{ flexGrow: 0 }}>
-                <Tooltip title="Open settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar
-                      alt="Remy Sharp"
-                      src="/static/images/avatar/2.jpg"
-                    />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ mt: "45px" }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  {settings.map((setting) => (
-                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                      <Typography textAlign="center">{setting}</Typography>
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </Box>
-            </React.Fragment>
-          )}
+          {auth.role === "Buyer" && auth.isLoggedIn && <BuyerNav />}
+          {auth.role === "Seller" && auth.isLoggedIn && <SellerNav />}
         </Toolbar>
       </Container>
     </AppBar>

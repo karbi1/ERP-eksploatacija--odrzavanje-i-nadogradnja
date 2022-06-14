@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-const Cart = require("./Cart");
-
 const cartItemSchema = new mongoose.Schema({
   cartId: {
     type: mongoose.SchemaTypes.ObjectId,
@@ -22,10 +20,6 @@ const cartItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
-
-cartItemSchema.pre("remove", function (next) {
-  //console.log(Cart.cartItems)
 });
 
 module.exports = mongoose.model("CartItem", cartItemSchema);

@@ -4,7 +4,7 @@ const Product = require("../models/Product");
 const getProducts = async (req, res, next) => {
   let products;
   try {
-    products = await Product.find();
+    products = await Product.find().populate("productType");
   } catch (err) {
     const error = new HttpError("Fetching products failed", 500);
     return next(error);
@@ -37,39 +37,31 @@ const getProductById = async (req, res, next) => {
 
 const createProduct = async (req, res, next) => {
   const {
+    seller,
     collectionName,
     productType,
     name,
     description,
     gender,
     price,
-    discount,
-    xs,
     s,
     m,
     l,
     xl,
-    xxl,
-    xxxl,
-    xxxxl,
   } = req.body;
 
   const createdProduct = new Product({
     collectionName,
+    seller,
     productType,
     name,
     description,
     gender,
     price,
-    discount,
-    xs,
     s,
     m,
     l,
     xl,
-    xxl,
-    xxxl,
-    xxxxl,
   });
 
   try {
@@ -87,21 +79,17 @@ const createProduct = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   const {
+    seller,
     collectionName,
     productType,
     name,
     description,
     gender,
     price,
-    discount,
-    xs,
     s,
     m,
     l,
     xl,
-    xxl,
-    xxxl,
-    xxxxl,
   } = req.body;
   const productId = req.params.id;
 
@@ -113,29 +101,24 @@ const updateProduct = async (req, res, next) => {
     return next(error);
   }
 
-  if (sellerId !== req.userData.userId) {
+  if (seller !== req.userData.userId) {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401
     );
     return next(Error);
   }
-
+  product.seller = seller;
   product.collectionName = collectionName;
   product.productType = productType;
   product.name = name;
   product.description = description;
   product.gender = gender;
   product.price = price;
-  product.discount = discount;
-  product.xs = xs;
   product.s = s;
   product.m = m;
   product.l = l;
   product.xl = xl;
-  product.xxl = xxl;
-  product.xxxl = xxxl;
-  product.xxxxl = xxxxl;
 
   try {
     await product.save();
@@ -158,11 +141,13 @@ const deleteProduct = async (req, res, next) => {
     return next(error);
   }
 
-  if (sellerId !== req.userData.userId) {
+  if (product.seller.toString() !== req.userData.userId) {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401
     );
+    console.log(product.seller);
+    console.log(req.userData.userId);
     return next(Error);
   }
 

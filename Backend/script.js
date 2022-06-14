@@ -210,5 +210,22 @@ async function runScript() {
     role: "Admin",
   });
 
+  const createdProductType = await ProductType.create({
+    type: "majica",
+  });
+
+  const createdProductType2 = await ProductType.create({
+    type: "sorc",
+  });
+
+  const createdProductType3 = await ProductType.create({
+    type: "kosulja",
+  });
+
+  await console.log(createdProductType);
+
+  await console.log(createdProductType2);
+  await console.log(createdProductType3);
+
   await console.log(createdAdmin);
 }

@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get("/", authUser, authRole(ROLE.ADMIN), buyersController.getBuyers);
 
+router.get("/:id", authUser, authRole(ROLE.BUYER), buyersController.getBuyer);
+
 router.get(
   "/:id/cart",
   authUser,

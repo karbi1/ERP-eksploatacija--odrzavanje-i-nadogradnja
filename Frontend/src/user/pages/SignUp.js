@@ -6,19 +6,10 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import { useState } from "react";
 
-import SellerSignUp from "./SellerSignUp";
-import BuyerSignUp from "./BuyerSignUp";
+import SellerSignUp from "../components/SellerSignUp";
+import BuyerSignUp from "../components/BuyerSignUp";
 
 export default function SignUp() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-  };
-
   const [userType, setUserType] = useState("Buyer");
 
   return (

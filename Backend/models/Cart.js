@@ -11,6 +11,9 @@ const cartSchema = new mongoose.Schema({
       ref: "CartItem",
     },
   ],
+  price: {
+    type: Number,
+  },
 });
 
 module.exports = mongoose.model("Cart", cartSchema);
