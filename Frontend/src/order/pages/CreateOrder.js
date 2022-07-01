@@ -4,21 +4,16 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { Grid } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useContext } from "react";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
-import InputLabel from "@mui/material/InputLabel";
 import { useLocation } from "react-router";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import { Link } from "react-router-dom";
 
 import { AuthContext } from "../../shared/context/auth-context";
 import StripeContainer from "../../shared/components/StripeContainer";
-import ImageUpload from "../../shared/components/ImageUpload";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 const theme = createTheme();
 
@@ -27,7 +22,10 @@ export default function CreateOrder() {
   const location = useLocation();
   const { price } = location.state;
   const [cart, setCart] = useState();
+  const [error, setError] = useState();
   const [succOrder, setSuccOrder] = useState(false);
+  const [orderId, setOrderId] = useState();
+  const [billingDetails, setBillingDetails] = useState();
 
   const auth = useContext(AuthContext);
 
@@ -45,7 +43,7 @@ export default function CreateOrder() {
 
       const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
       }
 
       setCart(responseData.cart);
@@ -83,11 +81,20 @@ export default function CreateOrder() {
 
       const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
       } else {
+        let billing = {
+          address: {
+            city: data.get("city"),
+            country: data.get("country"),
+            postal_code: data.get("postalCode"),
+            line1: data.get("address"),
+          },
+        };
+        setOrderId(responseData.order._id);
+        setBillingDetails(billing);
         setSuccOrder(true);
       }
-      console.log(await responseData);
     } catch (err) {
       console.log(err);
     }
@@ -95,123 +102,137 @@ export default function CreateOrder() {
     setIsLoading(false);
   };
 
+  const errorHandler = () => {
+    setError(null);
+  };
+
   return (
     <React.Fragment>
       {isLoading && <div>Loading</div>}
       {!isLoading && !succOrder && (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 5,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Backdrop
-              sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-              open={isLoading}
+        <>
+          <ErrorModal error={error} onClear={errorHandler} />
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Box
+              sx={{
+                marginTop: 5,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              <CircularProgress color="inherit" />
-            </Backdrop>
-            <ShoppingBasketIcon fontSize="large" />
-            <Typography component="h1" variant="h3">
-              New order
-            </Typography>
-          </Box>
-          <Box
-            sx={{ ml: 6, mr: 6, mt: 3, mb: 3 }}
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="address"
-              label="Address"
-              name="address"
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              id="floor"
-              label="Floor"
-              name="floor"
-              type="number"
-              fullWidth
-              required
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              required
-              label="Postal code"
-              name="postalCode"
-              type="number"
-              fullWidth
-              InputProps={{ inputProps: { min: 1 } }}
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="city"
-              label="City"
-              name="city"
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="region"
-              label="Region"
-              name="region"
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="country"
-              label="Country"
-              name="country"
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Number"
-              name="phoneNumber"
-              autoFocus
-              sx={{ mt: 2 }}
-            />
-            <Typography>Total price: {price}</Typography>
+              <Backdrop
+                sx={{
+                  color: "#fff",
+                  zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+                open={isLoading}
+              >
+                <CircularProgress color="inherit" />
+              </Backdrop>
+              <ShoppingBasketIcon fontSize="large" />
+              <Typography component="h1" variant="h3">
+                New order
+              </Typography>
+            </Box>
+            <Box
+              sx={{ ml: 6, mr: 6, mt: 3, mb: 3 }}
+              component="form"
+              onSubmit={handleSubmit}
+              noValidate
+            >
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="address"
+                label="Address"
+                name="address"
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                id="floor"
+                label="Floor"
+                name="floor"
+                type="number"
+                fullWidth
+                required
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                required
+                label="Postal code"
+                name="postalCode"
+                type="number"
+                fullWidth
+                InputProps={{ inputProps: { min: 1 } }}
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="city"
+                label="City"
+                name="city"
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="region"
+                label="Region"
+                name="region"
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="country"
+                label="Country"
+                name="country"
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Number"
+                name="phoneNumber"
+                autoFocus
+                sx={{ mt: 2 }}
+              />
+              <Typography>Total price: {price}</Typography>
 
-            <Button
-              size="large"
-              variant="contained"
-              color="success"
-              sx={{ mt: 2, mb: 2 }}
-              type="submit"
-            >
-              Place order
-            </Button>
-          </Box>
-        </ThemeProvider>
+              <Button
+                size="large"
+                variant="contained"
+                color="success"
+                sx={{ mt: 2, mb: 2 }}
+                type="submit"
+              >
+                Place order
+              </Button>
+            </Box>
+          </ThemeProvider>
+        </>
       )}
       {succOrder && !isLoading && (
         <Box sx={{ mt: 4, mr: 4, ml: 4 }}>
           <Typography variant="h4">Enter card details:</Typography>
-          <StripeContainer amount={price} />
+          <StripeContainer
+            billingDetails={billingDetails}
+            amount={price}
+            orderId={orderId}
+          />
           <Typography variant="body">Total price is: {price}</Typography>
         </Box>
       )}

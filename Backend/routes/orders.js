@@ -11,7 +11,7 @@ router.get("/", ordersController.getOrders);
 router.get(
   "/:id",
   authUser,
-  authRole(ROLE.BUYER, true),
+  authRole(ROLE.BUYER),
   ordersController.getOrdersFromUser
 );
 

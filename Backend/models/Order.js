@@ -42,6 +42,10 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Buyer",
   },
+  paid: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Order", orderSchema);

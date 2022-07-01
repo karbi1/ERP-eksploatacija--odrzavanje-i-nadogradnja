@@ -12,7 +12,11 @@ const stripeTestPromise = loadStripe(PUBLIC_KEY);
 export default function StripeContainer(props) {
   return (
     <Elements stripe={stripeTestPromise}>
-      <PaymentForm amount={props.amount} />
+      <PaymentForm
+        billingDetails={props.billingDetails}
+        amount={props.amount}
+        orderId={props.orderId}
+      />
     </Elements>
   );
 }

@@ -12,6 +12,7 @@ const productTypesRoutes = require("./routes/productType");
 const adminsRoutes = require("./routes/admins");
 const cartsRoutes = require("./routes/carts");
 const paymentRoutes = require("./routes/payments");
+const usersRoutes = require("./routes/users");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -42,6 +43,7 @@ app.use("/orders", ordersRoutes);
 app.use("/admins", adminsRoutes);
 app.use("/carts", cartsRoutes);
 app.use("/payments", paymentRoutes);
+app.use("/users", usersRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route.", 404);

@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
 const Buyer = require("../models/Buyer");
+const Seller = require("../models/Seller");
 const Cart = require("../models/Cart");
 
 const getBuyer = async (req, res, next) => {
@@ -78,6 +79,13 @@ const signup = async (req, res, next) => {
   const { email, password, name, lastName, dateOfBirth } = req.body;
 
   let existingBuyer;
+  if (await Seller.exists({ email: email })) {
+    const error = new HttpError(
+      "There is already a seller registered with this email.",
+      500
+    );
+    return next(error);
+  }
   try {
     existingBuyer = await Buyer.findOne({ email: email });
   } catch (err) {

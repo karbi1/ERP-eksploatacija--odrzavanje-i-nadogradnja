@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import SellerNav from "./SellerNav";
 import BuyerNav from "./BuyerNav";
 import { AuthContext } from "../shared/context/auth-context";
+import AdminNav from "./AdminNav";
 
 const pages = ["products", "sellers"];
 const settings = ["Account", "Order history", "Logout"];
@@ -98,6 +99,7 @@ const ResponsiveAppBar = () => {
           )}
           {auth.role === "Buyer" && auth.isLoggedIn && <BuyerNav />}
           {auth.role === "Seller" && auth.isLoggedIn && <SellerNav />}
+          {auth.role === "Admin" && auth.isLoggedIn && <AdminNav />}
         </Toolbar>
       </Container>
     </AppBar>

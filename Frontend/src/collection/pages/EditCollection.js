@@ -11,10 +11,12 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useContext } from "react";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
-import { AuthContext } from "../../shared/context/auth-context";
-import ImageUpload from "../../shared/components/ImageUpload";
 import { useEffect } from "react";
 import { useParams } from "react-router";
+
+import { AuthContext } from "../../shared/context/auth-context";
+import ImageUpload from "../../shared/components/ImageUpload";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 const theme = createTheme();
 
@@ -22,6 +24,7 @@ export default function EditCollection() {
   const params = useParams();
   const auth = useContext(AuthContext);
   const [loadedCollection, setLoadedCollection] = useState();
+  const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -71,17 +74,24 @@ export default function EditCollection() {
 
       const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
+      } else {
+        window.location.href = `/sellers/${auth.userId}/collections/${loadedCollection._id}`;
       }
     } catch (err) {
       console.log(err);
     }
-    window.location.href = `/sellers/${auth.userId}/collections/${loadedCollection._id}`;
+
     setIsLoading(false);
+  };
+
+  const errorHandler = () => {
+    setError(null);
   };
 
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
       {!isLoading &&
         loadedCollection &&
         loadedCollection.seller === auth.userId && (

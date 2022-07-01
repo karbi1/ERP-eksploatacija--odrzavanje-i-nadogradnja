@@ -13,9 +13,12 @@ import CheckroomIcon from "@mui/icons-material/Checkroom";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import FileBase64 from "react-file-base64";
+import axios from "axios";
 
 import { AuthContext } from "../../shared/context/auth-context";
 import ImageUpload from "../../shared/components/ImageUpload";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 const theme = createTheme();
 
@@ -27,6 +30,8 @@ export default function NewProduct() {
   const [type, setType] = React.useState("");
   const [collection, setCollection] = useState("");
   const [gender, setGender] = useState("");
+  const [error, setError] = useState();
+  const [item, setItem] = useState();
   const [sellerCollections, setSellerCollections] = useState();
 
   useEffect(() => {
@@ -61,6 +66,10 @@ export default function NewProduct() {
     sendRequest();
   }, []);
 
+  const errorHandler = () => {
+    setError(null);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -69,14 +78,30 @@ export default function NewProduct() {
 
     let id;
     try {
+      const imgData = new FormData();
       console.log(data.get("image"));
+      imgData.append("image", data.get("image"));
+      imgData.append("seller", auth.userId);
+      imgData.append("collectionName", data.get("collectionName"));
+      imgData.append("productType", data.get("productType"));
+      imgData.append("description", data.get("description"));
+      imgData.append("price", data.get("price"));
+      imgData.append("name", data.get("name"));
+      imgData.append("gender", data.get("gender"));
+      imgData.append("s", data.get("s"));
+      imgData.append("l", data.get("l"));
+      imgData.append("m", data.get("m"));
+      imgData.append("xl", data.get("xl"));
+
       const response = await fetch(`http://localhost:5000/products/`, {
         method: "POST",
         headers: {
           Authorization: "Bearer " + auth.token,
+
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+        body: imgData,
+        /*JSON.stringify({
           seller: auth.userId,
           collectionName: data.get("collectionName"),
           productType: data.get("productType"),
@@ -88,18 +113,24 @@ export default function NewProduct() {
           m: data.get("m"),
           l: data.get("l"),
           xl: data.get("xl"),
-        }),
+          image: imgData,
+        }),*/
       });
 
+      //axios.post("http://localhost:5000/products/");
+
       const responseData = await response.json();
-      id = responseData.product._id;
+
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
+      } else {
+        id = responseData.product._id;
+        window.location.href = `/products/${id}`;
       }
     } catch (err) {
       console.log(err);
     }
-    window.location.href = `/products/${id}`;
+
     setLoading(false);
   };
 
@@ -113,8 +144,13 @@ export default function NewProduct() {
     setGender(event.target.value);
   };
 
+  const imageHandler = (event) => {
+    setItem(event.target.files[0]);
+  };
+
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
       {isLoading && <div>Loading</div>}
       {!isLoading && productTypes && (
         <ThemeProvider theme={theme}>
@@ -165,6 +201,8 @@ export default function NewProduct() {
               placeholder="Description"
               sx={{ mt: 2 }}
             />
+
+            <input name="image" onChange={imageHandler} type="file" />
             <InputLabel sx={{ mt: 2 }}>Product type</InputLabel>
             <Select
               fullWidth
@@ -219,7 +257,6 @@ export default function NewProduct() {
               type="number"
               fullWidth
               InputProps={{ inputProps: { min: 1 } }}
-              autoFocus
               sx={{ mt: 2 }}
             />
             <Grid container spacing={2}>
@@ -231,7 +268,6 @@ export default function NewProduct() {
                   name="s"
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
-                  autoFocus
                   sx={{ mt: 2 }}
                 />
               </Grid>
@@ -243,7 +279,6 @@ export default function NewProduct() {
                   name="m"
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
-                  autoFocus
                   sx={{ mt: 2 }}
                 />
               </Grid>
@@ -255,7 +290,6 @@ export default function NewProduct() {
                   name="l"
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
-                  autoFocus
                   sx={{ mt: 2 }}
                 />
               </Grid>
@@ -267,7 +301,6 @@ export default function NewProduct() {
                   name="xl"
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
-                  autoFocus
                   sx={{ mt: 2 }}
                 />
               </Grid>

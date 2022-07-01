@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import { Typography, Button } from "@mui/material";
+import { Typography, Button, ListItem } from "@mui/material";
 import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import Radio from "@mui/material/Radio";
@@ -9,8 +9,10 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { Link } from "react-router-dom";
+import List from "@mui/material/List";
 
 import { AuthContext } from "../../shared/context/auth-context";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 export default function ProductDetail() {
   const auth = useContext(AuthContext);
@@ -18,7 +20,7 @@ export default function ProductDetail() {
   const [loadedProduct, setLoadedProduct] = useState();
   const [sellerCollections, setSellerCollections] = useState();
   const [amount, setAmount] = useState(1);
-  const [isCreator, setIsCreator] = useState(false);
+  const [error, setError] = useState();
   const params = useParams();
 
   const handleDecrement = () => {
@@ -76,7 +78,7 @@ export default function ProductDetail() {
 
       const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
       } else {
         console.log(responseData);
       }
@@ -106,6 +108,10 @@ export default function ProductDetail() {
     sendRequest();
   }, []);
 
+  const errorHandler = () => {
+    setError(null);
+  };
+
   return (
     <React.Fragment>
       {isLoading && (
@@ -115,6 +121,7 @@ export default function ProductDetail() {
       )}
       {!isLoading && loadedProduct && (
         <Paper sx={{ mt: 12, ml: 10, mr: 10, padding: 3 }} elevation={3}>
+          <ErrorModal error={error} onClear={errorHandler} />
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <Box
@@ -130,14 +137,36 @@ export default function ProductDetail() {
               />
             </Grid>
             <Grid item xs={4}>
-              <Typography variant="h5">{loadedProduct.name}</Typography>
-              <Typography variant="body1">
+              <Typography variant="h3">{loadedProduct.name}</Typography>
+              <Typography variant="h5">
+                Price: {loadedProduct.price}rsd
+              </Typography>
+              <Typography sx={{ mt: 2 }} variant="body1">
                 {loadedProduct.description}
               </Typography>
+              <div>
+                <img
+                  style={{ width: "100%", height: 300 }}
+                  src={loadedProduct.image}
+                />
+              </div>
+              <hr />
+              <List>
+                <ListItem>S: {loadedProduct.s}</ListItem>
+                <ListItem>M: {loadedProduct.m}</ListItem>
+                <ListItem>L: {loadedProduct.l}</ListItem>
+                <ListItem>XL: {loadedProduct.xl}</ListItem>
+              </List>
+              <hr />
             </Grid>
             {auth.role === "Buyer" && !isLoading && (
               <Grid item xs={3}>
-                <Box component="form" onSubmit={handleSubmit} noValidate>
+                <Box
+                  sx={{ mt: 12, ml: 8 }}
+                  component="form"
+                  onSubmit={handleSubmit}
+                  noValidate
+                >
                   <div align="center">
                     <FormControl>
                       <RadioGroup
@@ -184,9 +213,19 @@ export default function ProductDetail() {
                 </Box>
               </Grid>
             )}
-            {!auth.role && <div>Sign in to buy</div>}
-            {loadedProduct.seller === auth.userId && (
+            {!auth.role && (
               <>
+                <Box justifyContent="center" margin="auto">
+                  <Link to="/login" style={{ textDecoration: "none" }}>
+                    <Typography variant="h2" color="error">
+                      Log in to buy
+                    </Typography>
+                  </Link>
+                </Box>
+              </>
+            )}
+            {loadedProduct.seller === auth.userId && (
+              <Box sx={{ mt: 20, ml: 15 }}>
                 <Link
                   to={`/edit/product/${loadedProduct._id}`}
                   style={{ textDecoration: "none" }}
@@ -196,7 +235,7 @@ export default function ProductDetail() {
                 <Button color="error" onClick={handleDelete}>
                   Delete
                 </Button>
-              </>
+              </Box>
             )}
           </Grid>
         </Paper>

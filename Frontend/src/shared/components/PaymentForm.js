@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import axios from "axios";
+
+import { AuthContext } from "../../shared/context/auth-context";
 
 const CARD_OPTIONS = {
   iconStyle: "solid",
@@ -35,6 +37,7 @@ export default function PaymentForm(props) {
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: "card",
       card: elements.getElement(CardElement),
+      billing_details: props.billingDetails,
     });
 
     if (!error) {
@@ -43,6 +46,8 @@ export default function PaymentForm(props) {
         const response = await axios.post("http://localhost:5000/payments", {
           amount: props.amount,
           id,
+          orderId: props.orderId,
+          customerId: auth.userId,
         });
 
         if (response.data.success) {
@@ -59,6 +64,8 @@ export default function PaymentForm(props) {
     setFinished(true);
     setLoading(false);
   };
+
+  const auth = useContext(AuthContext);
 
   return (
     <>

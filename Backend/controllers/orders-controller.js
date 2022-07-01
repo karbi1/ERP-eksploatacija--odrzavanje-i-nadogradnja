@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 const getOrders = async (req, res, next) => {
   let orders;
   try {
-    orders = await Order.find();
+    orders = await Order.find().populate("buyer").populate("cartItems");
   } catch (err) {
     const error = new HttpError("Fetching orders failed", 500);
     return next(error);

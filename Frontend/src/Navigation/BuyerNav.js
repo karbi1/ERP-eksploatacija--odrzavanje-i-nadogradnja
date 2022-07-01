@@ -70,6 +70,11 @@ export default function BuyerNav() {
               <Typography textAlign="center">Account</Typography>
             </MenuItem>
           </Link>
+          <Link to="orders" style={{ textDecoration: "none", color: "black" }}>
+            <MenuItem key={"orders"} onClick={handleCloseUserMenu}>
+              <Typography textAlign="center">Orders</Typography>
+            </MenuItem>
+          </Link>
 
           <Link
             onClick={auth.logout}

@@ -48,6 +48,7 @@ const createProduct = async (req, res, next) => {
     m,
     l,
     xl,
+    image,
   } = req.body;
 
   const createdProduct = new Product({
@@ -62,6 +63,7 @@ const createProduct = async (req, res, next) => {
     m,
     l,
     xl,
+    image,
   });
 
   try {

@@ -14,7 +14,9 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { useParams } from "react-router";
+
 import { AuthContext } from "../../shared/context/auth-context";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 const theme = createTheme();
 
@@ -23,6 +25,7 @@ export default function EditProduct() {
   const auth = useContext(AuthContext);
   const [loadedProduct, setLoadedProduct] = useState();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
   const [productTypes, setProductTypes] = useState();
   const [type, setType] = React.useState("");
   const [collection, setCollection] = useState("");
@@ -107,9 +110,8 @@ export default function EditProduct() {
       );
 
       const responseData = await response.json();
-      console.log(responseData);
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
       }
     } catch (err) {
       console.log(err);
@@ -127,9 +129,13 @@ export default function EditProduct() {
   const handleGenderChange = (event) => {
     setGender(event.target.value);
   };
+  const errorHandler = () => {
+    setError(null);
+  };
 
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
       {isLoading && <div>Loading</div>}
       {!isLoading && productTypes && sellerCollections && loadedProduct && (
         <ThemeProvider theme={theme}>

@@ -147,7 +147,9 @@ const getCollectionsBySeller = async (req, res, next) => {
 
   let collections;
   try {
-    collections = await CollectionName.find({ seller: sellerId });
+    collections = await CollectionName.find({ seller: sellerId }).populate(
+      "seller"
+    );
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
@@ -161,7 +163,9 @@ const getProductsFromCollection = async (req, res, next) => {
 
   let products;
   try {
-    products = await Product.find({ collectionName: collectionId });
+    products = await Product.find({ collectionName: collectionId }).populate(
+      "collectionName"
+    );
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);

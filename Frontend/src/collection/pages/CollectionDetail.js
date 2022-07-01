@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -40,9 +41,13 @@ export default function CollectionDetail() {
         <div>
           <h1>Loading</h1>
         </div>
-      )}{" "}
+      )}
       {!isLoading && loadedProducts && (
         <>
+          <Typography variant="h1" sx={{ ml: 4, mt: 2 }}>
+            {loadedProducts[0].collectionName.name}
+          </Typography>
+          <hr />
           <ProductList products={loadedProducts} />
         </>
       )}

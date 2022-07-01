@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const ROLE = require("../data/data");
 const HttpError = require("../models/http-error");
 const Seller = require("../models/Seller");
+const Buyer = require("../models/Buyer");
 const CollectionName = require("../models/CollectionName.js");
 
 const getSellers = async (req, res, next) => {
@@ -102,6 +103,13 @@ const signup = async (req, res, next) => {
   const { email, password, brandName, brandDescription } = req.body;
 
   let existingSeller;
+  if (await Buyer.exists({ email: email })) {
+    const error = new HttpError(
+      "There is already a buyer registered with this email.",
+      500
+    );
+    return next(error);
+  }
   try {
     existingSeller = await Seller.findOne({ email: email });
   } catch (err) {
@@ -171,6 +179,10 @@ const signup = async (req, res, next) => {
     role: createdSeller.role,
     token: token,
   });
+};
+
+const redirect = async (email, passowrd) => {
+  console.log(email);
 };
 
 const login = async (req, res, next) => {
@@ -276,3 +288,4 @@ exports.getSellerById = getSellerById;
 exports.getSellerCollections = getSellerCollections;
 exports.updateSeller = updateSeller;
 exports.deleteSeller = deleteSeller;
+exports.redirect = redirect;

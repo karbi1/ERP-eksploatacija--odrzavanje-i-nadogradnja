@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import CollectionItem from "../../collection/components/CollectionItem";
 import { makeStyles } from "@mui/styles";
 import React, { useEffect, useState } from "react";
@@ -55,18 +55,24 @@ export default function SellerCollections(props) {
         </div>
       )}
       {!isLoading && loadedCollections && (
-        <Grid container spacing={4} className={classes.gridContainer}>
-          {loadedCollections.map((loadedCollection, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <CollectionItem
-                name={loadedCollection.name}
-                description={loadedCollection.description}
-                collectionId={loadedCollection._id}
-                sellerId={params.id}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Typography variant="h1" sx={{ ml: 4, mt: 2 }}>
+            {loadedCollections[0].seller.brandName}'s collections
+          </Typography>
+          <hr />
+          <Grid container spacing={4} className={classes.gridContainer}>
+            {loadedCollections.map((loadedCollection, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <CollectionItem
+                  name={loadedCollection.name}
+                  description={loadedCollection.description}
+                  collectionId={loadedCollection._id}
+                  sellerId={params.id}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
       )}
     </React.Fragment>
   );

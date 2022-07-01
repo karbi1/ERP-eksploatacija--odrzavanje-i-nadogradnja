@@ -7,16 +7,13 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormLabel from "@mui/material/FormLabel";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useContext } from "react";
 
+import ErrorModal from "../../shared/components/ErrorModal";
 import { AuthContext } from "../../shared/context/auth-context";
 
 const theme = createTheme();
@@ -24,15 +21,15 @@ const theme = createTheme();
 export default function SignIn() {
   const auth = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setLoading(true);
     const data = new FormData(event.currentTarget);
-    const userType = data.get("userType");
     try {
-      const response = await fetch(`http://localhost:5000/${userType}/login`, {
+      const response = await fetch(`http://localhost:5000/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,110 +42,96 @@ export default function SignIn() {
 
       const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(responseData.message);
+        setError(responseData.message || "Something went wrong");
       }
-      console.log(responseData);
+      //console.log(responseData);
       if (responseData.token) {
         auth.login(responseData.userId, responseData.token, responseData.role);
       }
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
     setLoading(false);
   };
 
-  return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Backdrop
-            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={loading}
-          >
-            <CircularProgress color="inherit" />
-          </Backdrop>
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Log in
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate>
-            <FormLabel id="demo-row-radio-buttons-group-label">
-              Type of user
-            </FormLabel>
-            <RadioGroup
-              row
-              aria-labelledby="demo-row-radio-buttons-group-label"
-              name="userType"
-              required
-            >
-              <FormControlLabel
-                value="buyers"
-                control={<Radio />}
-                label="Buyer"
-              />
-              <FormControlLabel
-                value="sellers"
-                control={<Radio />}
-                label="Seller"
-              />
-            </RadioGroup>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-            <Button
-              size="large"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 2, mb: 2 }}
-              type="submit"
-            >
-              Sign In
-            </Button>
-            <hr />
+  const errorHandler = () => {
+    setError(null);
+  };
 
-            <Link
-              style={{ textDecoration: "none", color: "white" }}
-              to="/signup"
+  return (
+    <>
+      <ErrorModal error={error} onClear={errorHandler} />
+      <ThemeProvider theme={theme}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+
+          <Box
+            sx={{
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Backdrop
+              sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={loading}
             >
-              <Button
-                color="success"
+              <CircularProgress color="inherit" />
+            </Backdrop>
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Log in
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <TextField
+                margin="normal"
+                required
                 fullWidth
-                size="medium"
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+              />
+              <Button
+                size="large"
+                fullWidth
                 variant="contained"
+                sx={{ mt: 2, mb: 2 }}
+                type="submit"
               >
-                Create new account
+                Sign In
               </Button>
-            </Link>
+              <hr />
+
+              <Link
+                style={{ textDecoration: "none", color: "white" }}
+                to="/signup"
+              >
+                <Button
+                  color="success"
+                  fullWidth
+                  size="medium"
+                  variant="contained"
+                >
+                  Create new account
+                </Button>
+              </Link>
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </ThemeProvider>
+        </Container>
+      </ThemeProvider>
+    </>
   );
 }

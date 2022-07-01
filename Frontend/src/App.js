@@ -23,6 +23,7 @@ import EditProduct from "./product/pages/EditProduct";
 import EditCollection from "./collection/pages/EditCollection";
 import EditBuyer from "./buyer/pages/EditBuyer";
 import OrderHistory from "./order/pages/OrderHistory";
+import Dashboard from "./admin/pages/Dashboard";
 
 const App = () => {
   const { userId, role, token, login, logout } = useAuth();
@@ -51,6 +52,7 @@ const App = () => {
           element={<CollectionDetail />}
         />
         <Route path="order" element={<CreateOrder />} />
+        <Route path="orders" element={<OrderHistory />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </React.Fragment>
     );
@@ -78,6 +80,26 @@ const App = () => {
         />
         <Route path="account/edit" element={<EditSeller />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+      </React.Fragment>
+    );
+  } else if (role === "Admin") {
+    routes = (
+      <React.Fragment>
+        <Route path="/" exact element={<ProductList />} />
+        <Route path="products" element={<ProductList />} />
+        <Route path="products/search/:searchTerm" element={<ProductList />} />
+        <Route path="products/:id" element={<ProductDetail />} />
+        <Route path="sellers" element={<Sellers />} />
+        <Route
+          path="sellers/:id/collections"
+          exact
+          element={<SellerCollections />}
+        />
+        <Route
+          path="sellers/:sellerId/collections/:collectionId"
+          element={<CollectionDetail />}
+        />
+        <Route path="dashboard" element={<Dashboard />} />
       </React.Fragment>
     );
   } else {
