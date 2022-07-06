@@ -320,7 +320,7 @@ export default function Dashboard() {
                   >
                     <ListItemText
                       primary={`Order ID: ${order._id}`}
-                      secondary={`Price : ${order.totalPrice}rsd`}
+                      secondary={`Price : ${order.totalPrice}rsd, Paid: ${order.paid}`}
                     />
                   </ListItem>
                 </React.Fragment>

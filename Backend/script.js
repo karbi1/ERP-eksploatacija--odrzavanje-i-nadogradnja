@@ -185,11 +185,7 @@ async function runScript() {
   await console.log(order);
   await console.log(order2);
   */
-  /* const admin = await Admin.create({
-    email: "bikar@bikar",
-    password: "bikar",
-  });*/
-  /*
+
   let password = "nikola";
   let hashedPassword;
   try {
@@ -203,11 +199,11 @@ async function runScript() {
   }
 
   const createdAdmin = await Admin.create({
-    email: "admin@gmail.com",
-    password: "adminadminadmin",
+    email: "nikola@gmail.com",
+    password: hashedPassword,
     name: "Nikola",
     lastName: "Bikar",
     role: "Admin",
-  });*/
-  //await console.log(createdAdmin);
+  });
+  await console.log(createdAdmin);
 }
