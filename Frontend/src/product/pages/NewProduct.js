@@ -14,16 +14,20 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FileBase64 from "react-file-base64";
-import axios from "axios";
+import { useForm } from "react-hook-form";
 
 import { AuthContext } from "../../shared/context/auth-context";
-import ImageUpload from "../../shared/components/ImageUpload";
 import ErrorModal from "../../shared/components/ErrorModal";
 
 const theme = createTheme();
 
 export default function NewProduct() {
   const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const auth = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [productTypes, setProductTypes] = useState();
@@ -31,7 +35,7 @@ export default function NewProduct() {
   const [collection, setCollection] = useState("");
   const [gender, setGender] = useState("");
   const [error, setError] = useState();
-  const [item, setItem] = useState();
+  const [item, setItem] = useState("");
   const [sellerCollections, setSellerCollections] = useState();
 
   useEffect(() => {
@@ -46,7 +50,7 @@ export default function NewProduct() {
         }
         setProductTypes(responseData.productTypes);
       } catch (err) {
-        //setError(err.message);
+        setError(err.message);
       }
       try {
         const response = await fetch(
@@ -59,7 +63,7 @@ export default function NewProduct() {
         }
         setSellerCollections(responseData.collections);
       } catch (err) {
-        //setError(err.message);
+        setError(err.message);
       }
       setIsLoading(false);
     };
@@ -70,54 +74,42 @@ export default function NewProduct() {
     setError(null);
   };
 
-  const handleSubmit = async (event) => {
+  const onSubmit = async (data, event) => {
     event.preventDefault();
-
     setLoading(true);
-    const data = new FormData(event.currentTarget);
-
     let id;
     try {
-      const imgData = new FormData();
-      console.log(data.get("image"));
-      imgData.append("image", data.get("image"));
-      imgData.append("seller", auth.userId);
-      imgData.append("collectionName", data.get("collectionName"));
-      imgData.append("productType", data.get("productType"));
-      imgData.append("description", data.get("description"));
-      imgData.append("price", data.get("price"));
-      imgData.append("name", data.get("name"));
-      imgData.append("gender", data.get("gender"));
-      imgData.append("s", data.get("s"));
-      imgData.append("l", data.get("l"));
-      imgData.append("m", data.get("m"));
-      imgData.append("xl", data.get("xl"));
-
+      if (
+        item === "" ||
+        event.target.collectionName.value === "" ||
+        event.target.productType.value === "" ||
+        event.target.gender.value === ""
+      ) {
+        setError("Everything has to be filled");
+        setLoading(false);
+        return;
+      }
       const response = await fetch(`http://localhost:5000/products/`, {
         method: "POST",
         headers: {
           Authorization: "Bearer " + auth.token,
-
           "Content-Type": "application/json",
         },
-        body: imgData,
-        /*JSON.stringify({
+        body: JSON.stringify({
           seller: auth.userId,
-          collectionName: data.get("collectionName"),
-          productType: data.get("productType"),
-          description: data.get("description"),
-          price: data.get("price"),
-          name: data.get("name"),
-          gender: data.get("gender"),
-          s: data.get("s"),
-          m: data.get("m"),
-          l: data.get("l"),
-          xl: data.get("xl"),
-          image: imgData,
-        }),*/
+          collectionName: event.target.collectionName.value,
+          productType: event.target.productType.value,
+          description: data.description,
+          price: data.price,
+          name: data.name,
+          gender: event.target.gender.value,
+          s: data.s,
+          m: data.m,
+          l: data.l,
+          xl: data.xl,
+          image: item,
+        }),
       });
-
-      //axios.post("http://localhost:5000/products/");
 
       const responseData = await response.json();
 
@@ -142,10 +134,6 @@ export default function NewProduct() {
   };
   const handleGenderChange = (event) => {
     setGender(event.target.value);
-  };
-
-  const imageHandler = (event) => {
-    setItem(event.target.files[0]);
   };
 
   return (
@@ -177,7 +165,7 @@ export default function NewProduct() {
           <Box
             sx={{ ml: 6, mr: 6, mt: 3, mb: 3 }}
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={(e) => handleSubmit(onSubmit)(e)}
             noValidate
           >
             <TextField
@@ -189,6 +177,14 @@ export default function NewProduct() {
               name="name"
               autoFocus
               sx={{ mt: 2 }}
+              {...register("name", {
+                required: "Required field",
+                pattern: {
+                  message: "Required field",
+                },
+              })}
+              error={!!errors?.name}
+              helperText={errors?.name ? errors.name.message : null}
             />
             <TextField
               id="description"
@@ -200,9 +196,22 @@ export default function NewProduct() {
               rows={3}
               placeholder="Description"
               sx={{ mt: 2 }}
+              {...register("description", {
+                required: "Required field",
+                pattern: {
+                  message: "Required field",
+                },
+              })}
+              error={!!errors?.description}
+              helperText={
+                errors?.description ? errors.description.message : null
+              }
             />
-
-            <input name="image" onChange={imageHandler} type="file" />
+            <FileBase64
+              type="file"
+              multiple={false}
+              onDone={(base64) => setItem(base64)}
+            />
             <InputLabel sx={{ mt: 2 }}>Product type</InputLabel>
             <Select
               fullWidth
@@ -258,6 +267,14 @@ export default function NewProduct() {
               fullWidth
               InputProps={{ inputProps: { min: 1 } }}
               sx={{ mt: 2 }}
+              {...register("price", {
+                required: "Required field",
+                pattern: {
+                  message: "Required field",
+                },
+              })}
+              error={!!errors?.price}
+              helperText={errors?.price ? errors.price.message : null}
             />
             <Grid container spacing={2}>
               <Grid item xs={2}>
@@ -269,6 +286,14 @@ export default function NewProduct() {
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
                   sx={{ mt: 2 }}
+                  {...register("s", {
+                    required: "Required field",
+                    pattern: {
+                      message: "Required field",
+                    },
+                  })}
+                  error={!!errors?.s}
+                  helperText={errors?.s ? errors.s.message : null}
                 />
               </Grid>
               <Grid item xs={2}>
@@ -280,6 +305,14 @@ export default function NewProduct() {
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
                   sx={{ mt: 2 }}
+                  {...register("m", {
+                    required: "Required field",
+                    pattern: {
+                      message: "Required field",
+                    },
+                  })}
+                  error={!!errors?.m}
+                  helperText={errors?.m ? errors.m.message : null}
                 />
               </Grid>
               <Grid item xs={2}>
@@ -291,6 +324,14 @@ export default function NewProduct() {
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
                   sx={{ mt: 2 }}
+                  {...register("l", {
+                    required: "Required field",
+                    pattern: {
+                      message: "Required field",
+                    },
+                  })}
+                  error={!!errors?.l}
+                  helperText={errors?.l ? errors.l.message : null}
                 />
               </Grid>
               <Grid item xs={2}>
@@ -302,6 +343,14 @@ export default function NewProduct() {
                   type="number"
                   InputProps={{ inputProps: { min: 0 } }}
                   sx={{ mt: 2 }}
+                  {...register("xl", {
+                    required: "Required field",
+                    pattern: {
+                      message: "Required field",
+                    },
+                  })}
+                  error={!!errors?.xl}
+                  helperText={errors?.xl ? errors.xl.message : null}
                 />
               </Grid>
             </Grid>

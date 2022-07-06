@@ -33,7 +33,7 @@ export default function Collection(props) {
     } catch (err) {
       console.log(err.message);
     }
-    window.location.href = `http://localhost:3000/sellers/${auth.userId}/collections`;
+    window.location.href = `http://localhost:3000/sellers/${props.seller}/collections`;
   };
 
   const auth = useContext(AuthContext);
@@ -47,7 +47,7 @@ export default function Collection(props) {
         <CardMedia
           component="img"
           height="140"
-          image="/static/images/cards/contemplative-reptile.jpg"
+          image={props.image}
           alt="green iguana"
         />
         <CardContent>
@@ -59,7 +59,7 @@ export default function Collection(props) {
           </Typography>
         </CardContent>
       </CardActionArea>
-      {auth.userId === props.sellerId && (
+      {(auth.userId === props.sellerId || auth.role === "Admin") && (
         <>
           <Link to={`/edit/collection/${props.collectionId}`}>
             <Button color="secondary">Edit collection</Button>

@@ -55,7 +55,7 @@ export default function ProductDetail() {
     } catch (err) {
       console.log(err.message);
     }
-    window.location.href = `http://localhost:3000/sellers/${auth.userId}/collections`;
+    window.location.href = `http://localhost:3000/sellers/${loadedProduct.seller}/collections`;
   };
 
   const handleSubmit = async (event) => {
@@ -133,7 +133,7 @@ export default function ProductDetail() {
                   maxWidth: { xs: 350, md: 250 },
                 }}
                 alt="The houe from the offer."
-                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&w=350&dpr=2"
+                src={loadedProduct.image}
               />
             </Grid>
             <Grid item xs={4}>
@@ -144,12 +144,7 @@ export default function ProductDetail() {
               <Typography sx={{ mt: 2 }} variant="body1">
                 {loadedProduct.description}
               </Typography>
-              <div>
-                <img
-                  style={{ width: "100%", height: 300 }}
-                  src={loadedProduct.image}
-                />
-              </div>
+
               <hr />
               <List>
                 <ListItem>S: {loadedProduct.s}</ListItem>
@@ -224,7 +219,8 @@ export default function ProductDetail() {
                 </Box>
               </>
             )}
-            {loadedProduct.seller === auth.userId && (
+            {(loadedProduct.seller === auth.userId ||
+              auth.role === "Admin") && (
               <Box sx={{ mt: 20, ml: 15 }}>
                 <Link
                   to={`/edit/product/${loadedProduct._id}`}

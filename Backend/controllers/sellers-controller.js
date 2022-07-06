@@ -100,7 +100,8 @@ const updateSeller = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  const { email, password, brandName, brandDescription } = req.body;
+  const { email, password, brandName, brandDescription, image } = req.body;
+  let img = image.base64;
 
   let existingSeller;
   if (await Buyer.exists({ email: email })) {
@@ -142,6 +143,7 @@ const signup = async (req, res, next) => {
     brandName,
     brandDescription,
     role: "Seller",
+    image: img,
   });
 
   try {
@@ -265,7 +267,11 @@ const deleteSeller = async (req, res, next) => {
     return next(error);
   }
 
-  if (sellerId !== req.userData.userId || req.userData.role !== ROLE.ADMIN) {
+  if (
+    sellerId.toString() === req.userData.userId ||
+    req.userData.role === "Admin"
+  ) {
+  } else {
     const Error = new HttpError(
       "You are not allowed to delete this seller",
       401
@@ -274,11 +280,12 @@ const deleteSeller = async (req, res, next) => {
   }
 
   try {
-    Seller.remove();
+    seller.remove();
   } catch (err) {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
   }
+  res.status(200).json({ message: "Deleted seller" });
 };
 
 exports.getSellers = getSellers;

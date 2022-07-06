@@ -54,7 +54,10 @@ export default function SellerCollections(props) {
           <h1>loading</h1>
         </div>
       )}
-      {!isLoading && loadedCollections && (
+      {!isLoading && loadedCollections && loadedCollections.length === 0 && (
+        <div>No collections</div>
+      )}
+      {!isLoading && loadedCollections && loadedCollections.length !== 0 && (
         <>
           <Typography variant="h1" sx={{ ml: 4, mt: 2 }}>
             {loadedCollections[0].seller.brandName}'s collections
@@ -68,6 +71,7 @@ export default function SellerCollections(props) {
                   description={loadedCollection.description}
                   collectionId={loadedCollection._id}
                   sellerId={params.id}
+                  image={loadedCollection.image}
                 />
               </Grid>
             ))}

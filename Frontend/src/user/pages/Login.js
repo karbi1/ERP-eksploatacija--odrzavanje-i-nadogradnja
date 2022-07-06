@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useContext } from "react";
+import { useForm } from "react-hook-form";
 
 import ErrorModal from "../../shared/components/ErrorModal";
 import { AuthContext } from "../../shared/context/auth-context";
@@ -22,12 +23,15 @@ export default function SignIn() {
   const auth = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const handleSubmit = async (event) => {
+  const onSubmit = async (data, event) => {
     event.preventDefault();
-
     setLoading(true);
-    const data = new FormData(event.currentTarget);
     try {
       const response = await fetch(`http://localhost:5000/users/login`, {
         method: "POST",
@@ -35,8 +39,8 @@ export default function SignIn() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: data.get("email"),
-          password: data.get("password"),
+          email: data.email,
+          password: data.password,
         }),
       });
 
@@ -44,7 +48,6 @@ export default function SignIn() {
       if (!response.ok) {
         setError(responseData.message || "Something went wrong");
       }
-      //console.log(responseData);
       if (responseData.token) {
         auth.login(responseData.userId, responseData.token, responseData.role);
       }
@@ -83,7 +86,11 @@ export default function SignIn() {
             <Typography component="h1" variant="h5">
               Log in
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate>
+            <Box
+              component="form"
+              onSubmit={(e) => handleSubmit(onSubmit)(e)}
+              noValidate
+            >
               <TextField
                 margin="normal"
                 required
@@ -93,6 +100,15 @@ export default function SignIn() {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                {...register("email", {
+                  required: "Required field",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email format",
+                  },
+                })}
+                error={!!errors?.email}
+                helperText={errors?.email ? errors.email.message : null}
               />
               <TextField
                 margin="normal"
@@ -103,6 +119,14 @@ export default function SignIn() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                {...register("password", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.password}
+                helperText={errors?.password ? errors.password.message : null}
               />
               <Button
                 size="large"

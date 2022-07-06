@@ -13,7 +13,7 @@ export default function Seller(props) {
         <CardMedia
           component="img"
           height="140"
-          image="/static/images/cards/contemplative-reptile.jpg"
+          image={props.image}
           alt="green iguana"
         />
         <CardContent>

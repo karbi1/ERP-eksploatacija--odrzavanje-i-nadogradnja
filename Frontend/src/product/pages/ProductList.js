@@ -187,6 +187,7 @@ export default function ProductList(props) {
                       title={loadedProduct.name}
                       price={loadedProduct.price}
                       id={loadedProduct._id}
+                      image={loadedProduct.image}
                     />
                   </Grid>
                 ))}
@@ -205,6 +206,7 @@ export default function ProductList(props) {
                 title={loadedProduct.name}
                 price={loadedProduct.price}
                 id={loadedProduct._id}
+                image={loadedProduct.image}
               />
             </Grid>
           ))}

@@ -19,12 +19,11 @@ const collectionNameSchema = new mongoose.Schema({
   },
   created: {
     type: Date,
-    required: true,
+    required: false,
   },
-  img: {
-    name: String,
-    data: Buffer,
-    contentType: String,
+  image: {
+    type: String,
+    required: false,
   },
 });
 

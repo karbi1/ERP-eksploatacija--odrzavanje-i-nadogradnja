@@ -31,24 +31,16 @@ router.post("/", async (req, res) => {
           const payment = await stripe.paymentIntents.create({
             amount: amount,
             currency: "USD",
-            description: "Order",
+            description: orderId,
             payment_method: id,
             confirm: true,
             customer: customer.id,
           });
 
-          console.log("Payment: ", payment);
-
           res.json({
             message: "Payment successful",
             success: true,
           });
-          let order;
-          try {
-            order = await Order.findById(orderId);
-            order.paid = true;
-            await order.save();
-          } catch (err) {}
         } catch (error) {
           console.log("error ", error);
           res.json({ message: "Payment failed", success: false });
@@ -63,18 +55,22 @@ router.post("/", async (req, res) => {
 router.post(
   "/webhook",
   express.json({ type: "application/json" }),
-  (request, response) => {
+  async (request, response) => {
     const event = request.body;
 
     // Handle the event
     switch (event.type) {
       case "payment_intent.succeeded":
         const paymentIntent = event.data.object;
-        console.log("---------------------------");
         console.log("succeeded: ", paymentIntent);
-        console.log("---------------------------");
-        // Then define and call a method to handle the successful payment intent.
-        // handlePaymentIntentSucceeded(paymentIntent);
+        let order;
+        try {
+          order = await Order.findById(paymentIntent.description);
+          order.paid = true;
+          await order.save();
+          console.log("PAID IN FULL");
+        } catch (err) {}
+
         break;
       case "payment_method.attached":
         const paymentMethod = event.data.object;

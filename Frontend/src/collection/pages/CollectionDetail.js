@@ -42,7 +42,10 @@ export default function CollectionDetail() {
           <h1>Loading</h1>
         </div>
       )}
-      {!isLoading && loadedProducts && (
+      {!isLoading && loadedProducts && loadedProducts.length === 0 && (
+        <div>No products</div>
+      )}
+      {!isLoading && loadedProducts && loadedProducts.length !== 0 && (
         <>
           <Typography variant="h1" sx={{ ml: 4, mt: 2 }}>
             {loadedProducts[0].collectionName.name}

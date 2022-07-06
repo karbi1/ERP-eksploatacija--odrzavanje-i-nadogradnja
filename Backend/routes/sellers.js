@@ -24,9 +24,9 @@ router.patch(
 router.post("/login", sellersController.login);
 
 router.delete(
-  "/",
+  "/:id",
   authUser,
-  authRole(ROLE.BUYER, true),
+  authRole(ROLE.ADMIN, true),
   sellersController.deleteSeller
 );
 

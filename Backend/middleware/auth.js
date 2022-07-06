@@ -6,10 +6,11 @@ const HttpError = require("../models/http-error");
 
 function authRole(role, admin) {
   return (req, res, next) => {
-    if (req.userData.role !== role) {
+    if (req.userData.role === role || req.userData.role === admin) {
+      next();
+    } else {
       throw new Error("Not allowed!");
     }
-    next();
   };
 }
 

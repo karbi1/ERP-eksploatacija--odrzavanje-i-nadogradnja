@@ -27,14 +27,14 @@ router.post(
 router.patch(
   "/:id",
   authUser,
-  authRole(ROLE.SELLER, true),
+  authRole(ROLE.SELLER),
   collectionsController.updateCollection
 );
 
 router.delete(
   "/:id",
   authUser,
-  authRole(ROLE.SELLER, true),
+  authRole(ROLE.SELLER, ROLE.ADMIN),
   collectionsController.deleteCollection
 );
 

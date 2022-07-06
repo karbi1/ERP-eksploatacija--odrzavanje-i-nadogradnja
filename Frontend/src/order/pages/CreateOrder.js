@@ -10,6 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useContext } from "react";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import { useLocation } from "react-router";
+import { useForm } from "react-hook-form";
 
 import { AuthContext } from "../../shared/context/auth-context";
 import StripeContainer from "../../shared/components/StripeContainer";
@@ -20,6 +21,11 @@ const theme = createTheme();
 export default function CreateOrder() {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const { price } = location.state;
   const [cart, setCart] = useState();
   const [error, setError] = useState();
@@ -57,10 +63,9 @@ export default function CreateOrder() {
     sendRequest();
   }, []);
 
-  const handleSubmit = async (event) => {
+  const onSubmit = async (data, event) => {
     event.preventDefault();
     setIsLoading(true);
-    const data = new FormData(event.currentTarget);
     try {
       const response = await fetch("http://localhost:5000/orders/", {
         method: "POST",
@@ -69,13 +74,13 @@ export default function CreateOrder() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phoneNumber: data.get("phoneNumber"),
-          address: data.get("address"),
-          floor: data.get("floor"),
-          postalCode: data.get("postalCode"),
-          region: data.get("region"),
-          country: data.get("country"),
-          city: data.get("city"),
+          phoneNumber: data.phoneNumber,
+          address: data.address,
+          floor: data.floor,
+          postalCode: data.postalCode,
+          region: data.region,
+          country: data.country,
+          city: data.city,
         }),
       });
 
@@ -83,16 +88,8 @@ export default function CreateOrder() {
       if (!response.ok) {
         setError(responseData.message || "Something went wrong");
       } else {
-        let billing = {
-          address: {
-            city: data.get("city"),
-            country: data.get("country"),
-            postal_code: data.get("postalCode"),
-            line1: data.get("address"),
-          },
-        };
         setOrderId(responseData.order._id);
-        setBillingDetails(billing);
+
         setSuccOrder(true);
       }
     } catch (err) {
@@ -139,7 +136,7 @@ export default function CreateOrder() {
             <Box
               sx={{ ml: 6, mr: 6, mt: 3, mb: 3 }}
               component="form"
-              onSubmit={handleSubmit}
+              onSubmit={(e) => handleSubmit(onSubmit)(e)}
               noValidate
             >
               <TextField
@@ -151,6 +148,14 @@ export default function CreateOrder() {
                 name="address"
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("address", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.address}
+                helperText={errors?.address ? errors.address.message : null}
               />
               <TextField
                 id="floor"
@@ -160,6 +165,14 @@ export default function CreateOrder() {
                 fullWidth
                 required
                 sx={{ mt: 2 }}
+                {...register("floor", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.floor}
+                helperText={errors?.floor ? errors.floor.message : null}
               />
               <TextField
                 required
@@ -170,6 +183,16 @@ export default function CreateOrder() {
                 InputProps={{ inputProps: { min: 1 } }}
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("postalCode", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.postalCode}
+                helperText={
+                  errors?.postalCode ? errors.postalCode.message : null
+                }
               />
               <TextField
                 margin="normal"
@@ -180,6 +203,14 @@ export default function CreateOrder() {
                 name="city"
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("city", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.city}
+                helperText={errors?.city ? errors.city.message : null}
               />
               <TextField
                 margin="normal"
@@ -190,6 +221,14 @@ export default function CreateOrder() {
                 name="region"
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("region", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.region}
+                helperText={errors?.region ? errors.region.message : null}
               />
               <TextField
                 margin="normal"
@@ -200,6 +239,14 @@ export default function CreateOrder() {
                 name="country"
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("country", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.country}
+                helperText={errors?.country ? errors.country.message : null}
               />
               <TextField
                 margin="normal"
@@ -209,6 +256,16 @@ export default function CreateOrder() {
                 name="phoneNumber"
                 autoFocus
                 sx={{ mt: 2 }}
+                {...register("phoneNumber", {
+                  required: "Required field",
+                  pattern: {
+                    message: "Required field",
+                  },
+                })}
+                error={!!errors?.phoneNumber}
+                helperText={
+                  errors?.phoneNumber ? errors.phoneNumber.message : null
+                }
               />
               <Typography>Total price: {price}</Typography>
 

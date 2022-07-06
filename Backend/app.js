@@ -57,6 +57,7 @@ app.use((error, req, res, next) => {
   res
     .status(error.code || 500)
     .json({ message: error.message || "Unknown error occurred!" });
+  // res.json({ error: error });
 });
 
 mongoose

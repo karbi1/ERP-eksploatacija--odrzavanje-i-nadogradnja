@@ -52,6 +52,7 @@ const Sellers = () => {
                 name={loadedSeller.brandName}
                 description={loadedSeller.brandDescription}
                 id={loadedSeller._id}
+                image={loadedSeller.image}
               />
             </Grid>
           ))}

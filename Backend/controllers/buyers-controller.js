@@ -30,8 +30,9 @@ const getBuyers = async (req, res, next) => {
 };
 
 const updateBuyer = async (req, res, next) => {
-  const { email, password, name, lastName, dateOfBirth } = req.body;
+  const { email, password, name, lastName, dateOfBirth, image } = req.body;
   const buyerId = req.params.id;
+  let img = image.base64;
 
   let buyer;
   try {
@@ -58,11 +59,14 @@ const updateBuyer = async (req, res, next) => {
     );
     return next(error);
   }
+  if (dateOfBirth !== undefined) {
+    buyer.dateOfBirth = dateOfBirth;
+  }
 
-  buyer.dateOfBirth = dateOfBirth;
   buyer.name = name;
   buyer.lastName = lastName;
   buyer.email = email;
+  buyer.image = img;
   buyer.password = hashedPassword;
 
   try {
@@ -76,7 +80,8 @@ const updateBuyer = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  const { email, password, name, lastName, dateOfBirth } = req.body;
+  const { email, password, name, lastName, image, dateOfBirth } = req.body;
+  let img = image.base64;
 
   let existingBuyer;
   if (await Seller.exists({ email: email })) {
@@ -117,8 +122,9 @@ const signup = async (req, res, next) => {
     password: hashedPassword,
     name,
     lastName,
-    dateOfBirth,
     role: "Buyer",
+    image: img,
+    dateOfBirth,
   });
   var createdCart = new Cart({});
 
@@ -258,6 +264,7 @@ const removeBuyer = async (req, res, next) => {
     const error = new HttpError("Something went wrong", 500);
     return next(error);
   }
+  res.status(200).json({ message: "Deleted buyer" });
 };
 
 exports.getBuyers = getBuyers;

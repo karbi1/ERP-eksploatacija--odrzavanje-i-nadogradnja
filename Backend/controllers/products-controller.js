@@ -1,5 +1,9 @@
 const HttpError = require("../models/http-error");
 const Product = require("../models/Product");
+const fs = require("fs");
+const { promisify } = require("util");
+const multer = require("multer");
+const pipeline = promisify(require("stream").pipeline);
 
 const getProducts = async (req, res, next) => {
   let products;
@@ -50,6 +54,7 @@ const createProduct = async (req, res, next) => {
     xl,
     image,
   } = req.body;
+  let img = image.base64;
 
   const createdProduct = new Product({
     collectionName,
@@ -63,7 +68,7 @@ const createProduct = async (req, res, next) => {
     m,
     l,
     xl,
-    image,
+    image: img,
   });
 
   try {
@@ -143,13 +148,15 @@ const deleteProduct = async (req, res, next) => {
     return next(error);
   }
 
-  if (product.seller.toString() !== req.userData.userId) {
+  if (
+    product.seller.toString() === req.userData.userId ||
+    req.userData.role === "Admin"
+  ) {
+  } else {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401
     );
-    console.log(product.seller);
-    console.log(req.userData.userId);
     return next(Error);
   }
 

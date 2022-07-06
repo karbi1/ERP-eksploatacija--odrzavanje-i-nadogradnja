@@ -46,13 +46,16 @@ const createCollection = async (req, res, next) => {
     throw new HttpError("Invalid inputs passed, check data", 422);
   }
 
-  const { seller, name, description, created } = req.body;
+  const { seller, name, description, created, image } = req.body;
+
+  let img = image.base64;
 
   const createdCollection = new CollectionName({
     seller,
     name,
     description,
     created,
+    image: img,
   });
 
   if (seller !== req.userData.userId) {
@@ -77,7 +80,7 @@ const createCollection = async (req, res, next) => {
 };
 
 const updateCollection = async (req, res, next) => {
-  const { seller, name, description, created } = req.body;
+  const { seller, name, description, created, image } = req.body;
   const collectionId = req.params.id;
 
   let collection;
@@ -124,7 +127,11 @@ const deleteCollection = async (req, res, next) => {
 
   let sellerId = collection.seller.toString();
 
-  if (sellerId.toString() !== req.userData.userId) {
+  if (
+    sellerId.toString() === req.userData.userId ||
+    req.userData.role === "Admin"
+  ) {
+  } else {
     const Error = new HttpError(
       "You are not allowed to delete this collection",
       401

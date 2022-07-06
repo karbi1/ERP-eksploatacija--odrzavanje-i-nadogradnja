@@ -36,7 +36,11 @@ const buyerSchema = new mongoose.Schema({
   },
   dateOfBirth: {
     type: Date,
-    required: true,
+    required: false,
+  },
+  image: {
+    type: String,
+    required: false,
   },
   role: String,
 });

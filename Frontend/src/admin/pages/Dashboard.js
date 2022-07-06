@@ -28,10 +28,11 @@ export default function Dashboard() {
   const [orders, setOrders] = useState();
   const [productTypes, setProductTypes] = useState();
   const [error, setError] = useState();
-
+  const [buyers, setBuyers] = useState();
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [sellers, setSellers] = useState();
   const [activeOrder, setActiveOrder] = useState();
 
   const [openOrder, setOpenOrder] = React.useState(false);
@@ -51,6 +52,32 @@ export default function Dashboard() {
         throw new Error(responseData.message);
       }
       setProductTypes(responseData.productTypes);
+    } catch (err) {
+      //setError(err.message);
+    }
+    try {
+      const response = await fetch(`http://localhost:5000/sellers`);
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message);
+      }
+      setSellers(responseData.sellers);
+    } catch (err) {
+      //setError(err.message);
+    }
+    try {
+      const response = await fetch(`http://localhost:5000/buyers`, {
+        headers: {
+          Authorization: "Bearer " + auth.token,
+        },
+      });
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message);
+      }
+      setBuyers(responseData.buyers);
     } catch (err) {
       //setError(err.message);
     }
@@ -104,6 +131,47 @@ export default function Dashboard() {
     setError(null);
   };
 
+  async function removeBuyerHandler(buyerId) {
+    try {
+      const response = await fetch(`http://localhost:5000/buyers/${buyerId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Bearer " + auth.token,
+          "Content-Type": "application/json",
+        },
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        setError(responseData.message || "Something went wrong");
+      } else {
+        setError(responseData.message || "Something went wrong");
+      }
+    } catch (err) {}
+    sendRequest();
+  }
+
+  async function removeSellerHandler(sellerId) {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/sellers/${sellerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer " + auth.token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const responseData = await response.json();
+      if (!response.ok) {
+        setError(responseData.message || "Something went wrong");
+      } else {
+        setError(responseData.message || "Something went wrong");
+      }
+    } catch (err) {}
+    sendRequest();
+  }
+
   async function removeProductTypeHandler(productTypeId) {
     try {
       const response = await fetch(
@@ -130,9 +198,9 @@ export default function Dashboard() {
     <React.Fragment>
       <ErrorModal error={error} onClear={errorHandler} />
       {isLoading && <div>Loading</div>}
-      {!isLoading && productTypes && (
+      {!isLoading && productTypes && buyers && orders && (
         <Grid container sx={{ ml: 3, mt: 3 }}>
-          <Grid item xs={4}>
+          <Grid sx={{ ml: 3, mt: 3, mb: 3, mr: 3 }} item xs={4}>
             <Typography variant="h3">Product types</Typography>
             <List>
               {productTypes.map((type, index) => (
@@ -189,7 +257,53 @@ export default function Dashboard() {
               </Box>
             </Modal>
           </Grid>
-          <Grid sx={{ ml: 2 }} item xs={7}>
+          <Grid sx={{ ml: 3, mt: 3, mb: 3, mr: 3 }} item xs={4}>
+            <Typography variant="h3">Buyers</Typography>
+            <List>
+              {buyers.map((buyer, index) => (
+                <ListItem
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={(e) => {
+                        removeBuyerHandler(buyer._id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                >
+                  {buyer.name}
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+          <Grid item sx={{ ml: 3, mt: 3, mb: 3, mr: 3 }} xs={4}>
+            <Typography variant="h3">Sellers</Typography>
+            <List>
+              {sellers.map((seller, index) => (
+                <ListItem
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={(e) => {
+                        removeSellerHandler(seller._id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                >
+                  {seller.brandName}
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+          <Grid sx={{ ml: 3, mt: 3, mb: 3, mr: 3 }} item xs={7}>
             <Typography variant="h3">Orders </Typography>
             <List
               sx={{

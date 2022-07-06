@@ -37,7 +37,6 @@ export default function PaymentForm(props) {
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: "card",
       card: elements.getElement(CardElement),
-      billing_details: props.billingDetails,
     });
 
     if (!error) {
